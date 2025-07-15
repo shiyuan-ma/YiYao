@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('单位日志列表')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <label>用户名：</label>
+                            <input type="text" name="userName"/>
+                        </li>
+                        <li>
+                            <label>提交时间：</label>
+                            <input type="text" class="time-input" placeholder="请选择时间" name="postTime"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="monitor:comment:add">
+                <i class="fa fa-plus"></i> 新增
+            </a>
+            <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="monitor:comment:edit">
+                <i class="fa fa-edit"></i> 修改
+            </a>
+            <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="monitor:comment:remove">
+                <i class="fa fa-remove"></i> 删除
+            </a>
+            <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="monitor:comment:export">
+                <i class="fa fa-download"></i> 导出
+            </a>
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+    var editFlag = [[${@permission.hasPermi('monitor:comment:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('monitor:comment:remove')}]];
+    var prefix = ctx + "monitor/comment"; // URL前缀，要和Controller的@RequestMapping一致
+
+    $(function() {
+        var options = {
+            url: prefix + "/list", // 获取数据的URL
+            createUrl: prefix + "/add", // 新增页面的URL
+            updateUrl: prefix + "/edit/{id}", // 修改页面的URL
+            removeUrl: prefix + "/remove", // 删除的URL
+            exportUrl: prefix + "/export", // 导出的URL
+            modalName: "单位日志",
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: '日志ID',
+                    visible: false
+                },
+                {
+                    field: 'content',
+                    title: '日志内容',
+                    formatter: function(value, row, index) {
+                        // 1. 判断内容是否存在
+                        if (!value) {
+                            return "-";
+                        }
+                        // 2. 使用jQuery动态创建一个div，利用浏览器的能力去除HTML标签
+                        var text = $('<div>').html(value).text();
+                        // 3. 截取前50个字符作为预览
+                        //var shortText = text.length > 50 ? text.substring(0, 50) + "..." : text;
+                        // 4. 返回处理后的纯文本预览
+                        return text;
+                    }
+                },
+                {
+                    field: 'userName',
+                    title: '用户名'
+                },
+                {
+                    field: 'ip',
+                    title: 'IP信息'
+                },
+                {
+                    field: 'topicId',
+                    title: '帖子ID'
+                },
+                {
+                    field: 'readUsers',
+                    title: '阅读人'
+                },
+                {
+                    field: 'postTime',
+                    title: '提交时间'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-trash-o"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+</script>
+</body>
+</html>

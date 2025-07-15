@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('日报管理列表')" />
+</head>
+<body class="gray-bg">
+<div class="container-div">
+	<div class="row">
+		<div class="col-sm-12 search-collapse">
+			<!-- 搜索表单 -->
+			<form id="formId">
+				<div class="select-list">
+					<ul>
+						<li>
+							<label>日志内容：</label>
+							<input type="text" name="text"/>
+						</li>
+						<li>
+							<label>提交时间：</label>
+							<input type="text" class="time-input" placeholder="请选择时间" name="time"/>
+						</li>
+						<li>
+							<label>帖子ID：</label>
+							<input type="text" name="topicid"/>
+						</li>
+						<li>
+							<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+						</li>
+					</ul>
+				</div>
+			</form>
+		</div>
+
+		<!-- 按钮工具栏 -->
+		<div class="btn-group-sm" id="toolbar" role="group">
+			<a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="system:daylog:add">
+				<i class="fa fa-plus"></i> 新增
+			</a>
+			<a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="system:daylog:edit">
+				<i class="fa fa-edit"></i> 修改
+			</a>
+			<a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="system:daylog:remove">
+				<i class="fa fa-trash"></i> 删除
+			</a>
+			<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="system:daylog:export">
+				<i class="fa fa-download"></i> 导出
+			</a>
+		</div>
+
+		<!-- 数据表格 -->
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table"></table>
+		</div>
+	</div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+	var editFlag = [[${@permission.hasPermi('system:daylog:edit')}]];
+	var removeFlag = [[${@permission.hasPermi('system:daylog:remove')}]];
+	var prefix = ctx + "system/daylog"; // 对应Controller的RequestMapping
+
+	$(function() {
+		var options = {
+			url: prefix + "/list", // 数据请求URL
+			createUrl: prefix + "/add", // 新增URL
+			updateUrl: prefix + "/edit/{id}", // 修改URL
+			removeUrl: prefix + "/remove", // 删除URL
+			exportUrl: prefix + "/export", // 导出URL
+			modalName: "日报", // 弹窗名称
+			columns: [{
+				checkbox: true
+			},
+				{
+					field: 'id',
+					title: 'ID',
+					visible: true // ID通常不显示，这里设为可见用于调试
+				},
+				{
+					field: 'text',
+					title: '日志内容',
+					formatter: function(value, row, index) {
+						// 使用pre-line保持换行，text-align设置文本对齐
+						return '<div style="white-space: pre-line; text-align: left;">' + value + '</div>';
+					}
+				},
+				{
+					field: 'time',
+					title: '提交时间'
+				},
+				{
+					field: 'topicid',
+					title: '帖子ID'
+				},
+				{
+					title: '操作',
+					align: 'center',
+					formatter: function(value, row, index) {
+						var actions = [];
+						actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+						actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-trash"></i>删除</a>');
+						return actions.join('');
+					}
+				}]
+		};
+		$.table.init(options);
+	});
+</script>
+</body>
+</html>

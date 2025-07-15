@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.CommentMapper">
+
+
+  <resultMap type="Comment" id="CommentResult">
+    <result property="id"    column="id"    />
+    <result property="content"    column="content"    />
+    <result property="ip"    column="ip"    />
+    <result property="isStaff"    column="isStaff"    />
+    <result property="lastUpdateTime"    column="lastUpdateTime"    />
+    <result property="postTime"    column="postTime"    />
+    <result property="quote"    column="quote"    />
+    <result property="quoteIdGroup"    column="quoteIdGroup"    />
+    <result property="quoteUpdateId"    column="quoteUpdateId"    />
+    <result property="status"    column="status"    />
+    <result property="topicId"    column="topicId"    />
+    <result property="userName"    column="userName"    />
+    <result property="readUsers"    column="readUsers"    />
+    <result property="zanUsers"    column="zanUsers"    />
+  </resultMap>
+
+  <sql id="selectCommentVo">
+    select id, content, ip, isStaff, lastUpdateTime, postTime, quote, quoteIdGroup, quoteUpdateId, status, topicId, userName, readUsers, zanUsers from comment
+  </sql>
+  <select id="selectAll" parameterType="string" resultMap="CommentResult">
+    <include refid="selectCommentVo"/>
+    where userName = #{userName,jdbcType=VARCHAR}
+    order by postTime desc
+  </select>
+  <update id="updateByPrimaryKey" parameterType="com.ruoyi.system.domain.Comment">
+    update comment
+    set ip = #{ip,jdbcType=VARCHAR},
+      isStaff = #{isstaff,jdbcType=BIT},
+      lastUpdateTime = #{lastupdatetime,jdbcType=TIMESTAMP},
+      postTime = #{posttime,jdbcType=TIMESTAMP},
+      quoteIdGroup = #{quoteidgroup,jdbcType=VARCHAR},
+      quoteUpdateId = #{quoteupdateid,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      topicId = #{topicid,jdbcType=BIGINT},
+      userName = #{username,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+
+  <select id="selectIsInsert" resultMap="CommentResult">
+    <include refid="selectCommentVo"/>
+    where userName = #{userName,jdbcType=VARCHAR} AND topicId = #{topicId,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectCommentList" parameterType="Comment" resultMap="CommentResult">
+    <include refid="selectCommentVo"/>
+    <where>
+      <if test="content != null  and content != ''"> and content = #{content}</if>
+      <if test="ip != null  and ip != ''"> and ip = #{ip}</if>
+      <if test="isStaff != null "> and isStaff = #{isStaff}</if>
+      <if test="lastUpdateTime != null "> and lastUpdateTime = #{lastUpdateTime}</if>
+      <if test="postTime != null "> and postTime = #{postTime}</if>
+      <if test="quote != null  and quote != ''"> and quote = #{quote}</if>
+      <if test="quoteIdGroup != null  and quoteIdGroup != ''"> and quoteIdGroup = #{quoteIdGroup}</if>
+      <if test="quoteUpdateId != null  and quoteUpdateId != ''"> and quoteUpdateId = #{quoteUpdateId}</if>
+      <if test="status != null "> and status = #{status}</if>
+      <if test="topicId != null "> and topicId = #{topicId}</if>
+      <if test="userName != null  and userName != ''"> and userName like concat('%', #{userName}, '%')</if>
+      <if test="readUsers != null  and readUsers != ''"> and readUsers = #{readUsers}</if>
+      <if test="zanUsers != null  and zanUsers != ''"> and zanUsers = #{zanUsers}</if>
+    </where>
+    order by postTime desc
+  </select>
+
+  <select id="selectCommentById" parameterType="Long" resultMap="CommentResult">
+    <include refid="selectCommentVo"/>
+    where id = #{id}
+  </select>
+
+  <insert id="insertComment" parameterType="Comment" useGeneratedKeys="true" keyProperty="id">
+    insert into comment
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="content != null">content,</if>
+      <if test="ip != null">ip,</if>
+      <if test="isStaff != null">isStaff,</if>
+      <if test="lastUpdateTime != null">lastUpdateTime,</if>
+      <if test="postTime != null">postTime,</if>
+      <if test="quote != null">quote,</if>
+      <if test="quoteIdGroup != null">quoteIdGroup,</if>
+      <if test="quoteUpdateId != null">quoteUpdateId,</if>
+      <if test="status != null">status,</if>
+      <if test="topicId != null">topicId,</if>
+      <if test="userName != null">userName,</if>
+      <if test="readUsers != null">readUsers,</if>
+      <if test="zanUsers != null">zanUsers,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="content != null">#{content},</if>
+      <if test="ip != null">#{ip},</if>
+      <if test="isStaff != null">#{isStaff},</if>
+      <if test="lastUpdateTime != null">#{lastUpdateTime},</if>
+      <if test="postTime != null">#{postTime},</if>
+      <if test="quote != null">#{quote},</if>
+      <if test="quoteIdGroup != null">#{quoteIdGroup},</if>
+      <if test="quoteUpdateId != null">#{quoteUpdateId},</if>
+      <if test="status != null">#{status},</if>
+      <if test="topicId != null">#{topicId},</if>
+      <if test="userName != null">#{userName},</if>
+      <if test="readUsers != null">#{readUsers},</if>
+      <if test="zanUsers != null">#{zanUsers},</if>
+    </trim>
+  </insert>
+
+  <update id="updateComment" parameterType="Comment">
+    update comment
+    <trim prefix="SET" suffixOverrides=",">
+      <if test="content != null">content = #{content},</if>
+      <if test="ip != null">ip = #{ip},</if>
+      <if test="isStaff != null">isStaff = #{isStaff},</if>
+      <if test="lastUpdateTime != null">lastUpdateTime = #{lastUpdateTime},</if>
+      <if test="postTime != null">postTime = #{postTime},</if>
+      <if test="quote != null">quote = #{quote},</if>
+      <if test="quoteIdGroup != null">quoteIdGroup = #{quoteIdGroup},</if>
+      <if test="quoteUpdateId != null">quoteUpdateId = #{quoteUpdateId},</if>
+      <if test="status != null">status = #{status},</if>
+      <if test="topicId != null">topicId = #{topicId},</if>
+      <if test="userName != null">userName = #{userName},</if>
+      <if test="readUsers != null">readUsers = #{readUsers},</if>
+      <if test="zanUsers != null">zanUsers = #{zanUsers},</if>
+    </trim>
+    where id = #{id}
+  </update>
+
+  <delete id="deleteCommentById" parameterType="Long">
+    delete from comment where id = #{id}
+  </delete>
+
+  <delete id="deleteCommentByIds" parameterType="String">
+    delete from comment where id in
+    <foreach item="id" collection="array" open="(" separator="," close=")">
+      #{id}
+    </foreach>
+  </delete>
+
+</mapper>

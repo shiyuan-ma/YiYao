@@ -45,6 +45,14 @@ public class XssFilter implements Filter
     {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
+        // 【关键修改】获取请求的URL
+        String url = req.getRequestURI();
+        // 【关键修改】如果URL是修改保存的接口，则直接放行，不进行XSS过滤
+        if (url.contains("/monitor/comment/edit"))
+        {
+            chain.doFilter(request, response);
+            return;
+        }
         if (handleExcludeURL(req, resp))
         {
             chain.doFilter(request, response);

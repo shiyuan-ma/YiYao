@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改日报信息')" />
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-daylog-edit" th:object="${daylog}">
+        <input name="id" th:field="*{id}" type="hidden">
+        <div class="col-xs-12">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">日报内容：</label>
+                <div class="col-sm-8">
+                    <textarea name="text" class="form-control" required>[[*{text}]]</textarea> <!-- 建议加上 required -->
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">时间：</label>
+                <div class="col-sm-8">
+                    <div class="input-group date">
+                        <!-- 【修改1】修改 th:value 的日期格式 和 placeholder -->
+                        <input name="time" th:value="${#dates.format(daylog.time, 'yyyy-MM-dd HH:mm:ss')}" class="form-control" placeholder="yyyy-MM-dd HH:mm:ss" type="text" required>
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">帖子ID：</label>
+                <div class="col-sm-8">
+                    <input name="topicid" th:field="*{topicid}" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: datetimepicker-js" />
+<script th:inline="javascript">
+    var prefix = ctx + "system/daylog";
+    $("#form-daylog-edit").validate({
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/edit", $('#form-daylog-edit').serialize());
+        }
+    }
+
+    $("input[name='time']").datetimepicker({
+        // 【修改2】修改 format 以包含时分秒
+        format: "yyyy-mm-dd hh:ii:ss",
+        // 【修改3】删除 minView 属性，允许选择时间
+        // minView: "month", // 这行必须删除或注释掉
+        autoclose: true
+    });
+</script>
+</body>
+</html>

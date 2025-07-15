@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.UserMapper">
+  <resultMap id="BaseResultMap" type="com.ruoyi.system.domain.User">
+    <result column="id" jdbcType="BIGINT" property="id" />
+    <result column="account" jdbcType="VARCHAR" property="account" />
+    <result column="allowUserDynamic" jdbcType="BIT" property="allowuserdynamic" />
+    <result column="answer" jdbcType="VARCHAR" property="answer" />
+    <result column="avatarName" jdbcType="VARCHAR" property="avatarname" />
+    <result column="cancelAccountTime" jdbcType="BIGINT" property="cancelaccounttime" />
+    <result column="deposit" jdbcType="DECIMAL" property="deposit" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="issue" jdbcType="VARCHAR" property="issue" />
+    <result column="mobile" jdbcType="VARCHAR" property="mobile" />
+    <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="platformUserId" jdbcType="VARCHAR" property="platformuserid" />
+    <result column="point" jdbcType="BIGINT" property="point" />
+    <result column="realNameAuthentication" jdbcType="BIT" property="realnameauthentication" />
+    <result column="registrationDate" jdbcType="TIMESTAMP" property="registrationdate" />
+    <result column="salt" jdbcType="VARCHAR" property="salt" />
+    <result column="securityDigest" jdbcType="BIGINT" property="securitydigest" />
+    <result column="state" jdbcType="INTEGER" property="state" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="userName" jdbcType="VARCHAR" property="username" />
+    <result column="userVersion" jdbcType="INTEGER" property="userversion" />
+    <result column="headimg" jdbcType="VARCHAR" property="headimg" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.ruoyi.system.domain.User">
+    <result column="remarks" jdbcType="LONGVARCHAR" property="remarks" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, account, allowUserDynamic, answer, avatarName, cancelAccountTime, deposit, email, 
+    issue, mobile, nickname, password, platformUserId, point, realNameAuthentication, 
+    registrationDate, salt, securityDigest, state, type, userName, userVersion, headimg
+  </sql>
+  <sql id="Blob_Column_List">
+    remarks
+  </sql>
+  <select id="selectByExampleWithBLOBs" parameterType="com.ruoyi.system.domain.UserExample" resultMap="ResultMapWithBLOBs">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    'true' as QUERYID,
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" parameterType="com.ruoyi.system.domain.UserExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    'true' as QUERYID,
+    <include refid="Base_Column_List" />
+    from user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.ruoyi.system.domain.UserExample">
+    delete from user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ruoyi.system.domain.User">
+    insert into user (id, account, allowUserDynamic, 
+      answer, avatarName, cancelAccountTime, 
+      deposit, email, issue, 
+      mobile, nickname, password, 
+      platformUserId, point, realNameAuthentication, 
+      registrationDate, salt, securityDigest, 
+      state, type, userName, 
+      userVersion, headimg, remarks
+      )
+    values (#{id,jdbcType=BIGINT}, #{account,jdbcType=VARCHAR}, #{allowuserdynamic,jdbcType=BIT}, 
+      #{answer,jdbcType=VARCHAR}, #{avatarname,jdbcType=VARCHAR}, #{cancelaccounttime,jdbcType=BIGINT}, 
+      #{deposit,jdbcType=DECIMAL}, #{email,jdbcType=VARCHAR}, #{issue,jdbcType=VARCHAR}, 
+      #{mobile,jdbcType=VARCHAR}, #{nickname,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{platformuserid,jdbcType=VARCHAR}, #{point,jdbcType=BIGINT}, #{realnameauthentication,jdbcType=BIT}, 
+      #{registrationdate,jdbcType=TIMESTAMP}, #{salt,jdbcType=VARCHAR}, #{securitydigest,jdbcType=BIGINT}, 
+      #{state,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, 
+      #{userversion,jdbcType=INTEGER}, #{headimg,jdbcType=VARCHAR}, #{remarks,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.ruoyi.system.domain.User">
+    insert into user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="account != null">
+        account,
+      </if>
+      <if test="allowuserdynamic != null">
+        allowUserDynamic,
+      </if>
+      <if test="answer != null">
+        answer,
+      </if>
+      <if test="avatarname != null">
+        avatarName,
+      </if>
+      <if test="cancelaccounttime != null">
+        cancelAccountTime,
+      </if>
+      <if test="deposit != null">
+        deposit,
+      </if>
+      <if test="email != null">
+        email,
+      </if>
+      <if test="issue != null">
+        issue,
+      </if>
+      <if test="mobile != null">
+        mobile,
+      </if>
+      <if test="nickname != null">
+        nickname,
+      </if>
+      <if test="password != null">
+        password,
+      </if>
+      <if test="platformuserid != null">
+        platformUserId,
+      </if>
+      <if test="point != null">
+        point,
+      </if>
+      <if test="realnameauthentication != null">
+        realNameAuthentication,
+      </if>
+      <if test="registrationdate != null">
+        registrationDate,
+      </if>
+      <if test="salt != null">
+        salt,
+      </if>
+      <if test="securitydigest != null">
+        securityDigest,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+      <if test="username != null">
+        userName,
+      </if>
+      <if test="userversion != null">
+        userVersion,
+      </if>
+      <if test="headimg != null">
+        headimg,
+      </if>
+      <if test="remarks != null">
+        remarks,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="account != null">
+        #{account,jdbcType=VARCHAR},
+      </if>
+      <if test="allowuserdynamic != null">
+        #{allowuserdynamic,jdbcType=BIT},
+      </if>
+      <if test="answer != null">
+        #{answer,jdbcType=VARCHAR},
+      </if>
+      <if test="avatarname != null">
+        #{avatarname,jdbcType=VARCHAR},
+      </if>
+      <if test="cancelaccounttime != null">
+        #{cancelaccounttime,jdbcType=BIGINT},
+      </if>
+      <if test="deposit != null">
+        #{deposit,jdbcType=DECIMAL},
+      </if>
+      <if test="email != null">
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="issue != null">
+        #{issue,jdbcType=VARCHAR},
+      </if>
+      <if test="mobile != null">
+        #{mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="nickname != null">
+        #{nickname,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="platformuserid != null">
+        #{platformuserid,jdbcType=VARCHAR},
+      </if>
+      <if test="point != null">
+        #{point,jdbcType=BIGINT},
+      </if>
+      <if test="realnameauthentication != null">
+        #{realnameauthentication,jdbcType=BIT},
+      </if>
+      <if test="registrationdate != null">
+        #{registrationdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="salt != null">
+        #{salt,jdbcType=VARCHAR},
+      </if>
+      <if test="securitydigest != null">
+        #{securitydigest,jdbcType=BIGINT},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=INTEGER},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="username != null">
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="userversion != null">
+        #{userversion,jdbcType=INTEGER},
+      </if>
+      <if test="headimg != null">
+        #{headimg,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks != null">
+        #{remarks,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.ruoyi.system.domain.UserExample" resultType="java.lang.Long">
+    select count(*) from user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update user
+    <set>
+      <if test="row.id != null">
+        id = #{row.id,jdbcType=BIGINT},
+      </if>
+      <if test="row.account != null">
+        account = #{row.account,jdbcType=VARCHAR},
+      </if>
+      <if test="row.allowuserdynamic != null">
+        allowUserDynamic = #{row.allowuserdynamic,jdbcType=BIT},
+      </if>
+      <if test="row.answer != null">
+        answer = #{row.answer,jdbcType=VARCHAR},
+      </if>
+      <if test="row.avatarname != null">
+        avatarName = #{row.avatarname,jdbcType=VARCHAR},
+      </if>
+      <if test="row.cancelaccounttime != null">
+        cancelAccountTime = #{row.cancelaccounttime,jdbcType=BIGINT},
+      </if>
+      <if test="row.deposit != null">
+        deposit = #{row.deposit,jdbcType=DECIMAL},
+      </if>
+      <if test="row.email != null">
+        email = #{row.email,jdbcType=VARCHAR},
+      </if>
+      <if test="row.issue != null">
+        issue = #{row.issue,jdbcType=VARCHAR},
+      </if>
+      <if test="row.mobile != null">
+        mobile = #{row.mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="row.nickname != null">
+        nickname = #{row.nickname,jdbcType=VARCHAR},
+      </if>
+      <if test="row.password != null">
+        password = #{row.password,jdbcType=VARCHAR},
+      </if>
+      <if test="row.platformuserid != null">
+        platformUserId = #{row.platformuserid,jdbcType=VARCHAR},
+      </if>
+      <if test="row.point != null">
+        point = #{row.point,jdbcType=BIGINT},
+      </if>
+      <if test="row.realnameauthentication != null">
+        realNameAuthentication = #{row.realnameauthentication,jdbcType=BIT},
+      </if>
+      <if test="row.registrationdate != null">
+        registrationDate = #{row.registrationdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="row.salt != null">
+        salt = #{row.salt,jdbcType=VARCHAR},
+      </if>
+      <if test="row.securitydigest != null">
+        securityDigest = #{row.securitydigest,jdbcType=BIGINT},
+      </if>
+      <if test="row.state != null">
+        state = #{row.state,jdbcType=INTEGER},
+      </if>
+      <if test="row.type != null">
+        type = #{row.type,jdbcType=INTEGER},
+      </if>
+      <if test="row.username != null">
+        userName = #{row.username,jdbcType=VARCHAR},
+      </if>
+      <if test="row.userversion != null">
+        userVersion = #{row.userversion,jdbcType=INTEGER},
+      </if>
+      <if test="row.headimg != null">
+        headimg = #{row.headimg,jdbcType=VARCHAR},
+      </if>
+      <if test="row.remarks != null">
+        remarks = #{row.remarks,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="example != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map">
+    update user
+    set id = #{row.id,jdbcType=BIGINT},
+      account = #{row.account,jdbcType=VARCHAR},
+      allowUserDynamic = #{row.allowuserdynamic,jdbcType=BIT},
+      answer = #{row.answer,jdbcType=VARCHAR},
+      avatarName = #{row.avatarname,jdbcType=VARCHAR},
+      cancelAccountTime = #{row.cancelaccounttime,jdbcType=BIGINT},
+      deposit = #{row.deposit,jdbcType=DECIMAL},
+      email = #{row.email,jdbcType=VARCHAR},
+      issue = #{row.issue,jdbcType=VARCHAR},
+      mobile = #{row.mobile,jdbcType=VARCHAR},
+      nickname = #{row.nickname,jdbcType=VARCHAR},
+      password = #{row.password,jdbcType=VARCHAR},
+      platformUserId = #{row.platformuserid,jdbcType=VARCHAR},
+      point = #{row.point,jdbcType=BIGINT},
+      realNameAuthentication = #{row.realnameauthentication,jdbcType=BIT},
+      registrationDate = #{row.registrationdate,jdbcType=TIMESTAMP},
+      salt = #{row.salt,jdbcType=VARCHAR},
+      securityDigest = #{row.securitydigest,jdbcType=BIGINT},
+      state = #{row.state,jdbcType=INTEGER},
+      type = #{row.type,jdbcType=INTEGER},
+      userName = #{row.username,jdbcType=VARCHAR},
+      userVersion = #{row.userversion,jdbcType=INTEGER},
+      headimg = #{row.headimg,jdbcType=VARCHAR},
+      remarks = #{row.remarks,jdbcType=LONGVARCHAR}
+    <if test="example != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update user
+    set id = #{row.id,jdbcType=BIGINT},
+      account = #{row.account,jdbcType=VARCHAR},
+      allowUserDynamic = #{row.allowuserdynamic,jdbcType=BIT},
+      answer = #{row.answer,jdbcType=VARCHAR},
+      avatarName = #{row.avatarname,jdbcType=VARCHAR},
+      cancelAccountTime = #{row.cancelaccounttime,jdbcType=BIGINT},
+      deposit = #{row.deposit,jdbcType=DECIMAL},
+      email = #{row.email,jdbcType=VARCHAR},
+      issue = #{row.issue,jdbcType=VARCHAR},
+      mobile = #{row.mobile,jdbcType=VARCHAR},
+      nickname = #{row.nickname,jdbcType=VARCHAR},
+      password = #{row.password,jdbcType=VARCHAR},
+      platformUserId = #{row.platformuserid,jdbcType=VARCHAR},
+      point = #{row.point,jdbcType=BIGINT},
+      realNameAuthentication = #{row.realnameauthentication,jdbcType=BIT},
+      registrationDate = #{row.registrationdate,jdbcType=TIMESTAMP},
+      salt = #{row.salt,jdbcType=VARCHAR},
+      securityDigest = #{row.securitydigest,jdbcType=BIGINT},
+      state = #{row.state,jdbcType=INTEGER},
+      type = #{row.type,jdbcType=INTEGER},
+      userName = #{row.username,jdbcType=VARCHAR},
+      userVersion = #{row.userversion,jdbcType=INTEGER},
+      headimg = #{row.headimg,jdbcType=VARCHAR}
+    <if test="example != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+
+
+</mapper>

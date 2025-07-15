@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增单位日志')" />
+    <!-- 引入日期时间选择器CSS -->
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<body>
+<div class="form-content">
+    <form id="form-comment-add" class="form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">提交人：</label>
+            <div class="col-sm-8">
+                <!-- 字段 name="userName" -->
+                <select name="userName" class="form-control" required>
+                    <option value="">--请选择--</option>
+                    <option value="YNaBK6rFfC2yduLkzYI">马世园</option>
+                    <option value="Yk4fQG1kTOPiGXD277X">赵帅宇</option>
+                    <option value="SyiWKpmNFlQjwhYS7C0">李研暾</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">帖子ID：</label>
+            <div class="col-sm-8">
+                <!-- 字段 name="topicId" -->
+                <input name="topicId" class="form-control" type="text" required>
+            </div>
+        </div>
+
+        <!-- 【新增】提交时间字段 -->
+        <div class="form-group">
+            <label class="col-sm-3 control-label is-required">提交时间：</label>
+            <div class="col-sm-8">
+                <div class="input-group date">
+                    <input name="postTime" class="form-control" placeholder="yyyy-MM-dd HH:mm:ss" type="text" required>
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">日志内容：</label>
+            <div class="col-sm-8">
+                <!-- 字段 name="content"，用户在这里输入纯文本 -->
+                <textarea name="content" class="form-control" rows="5" placeholder="请输入完成工作内容，换行分隔..."></textarea>
+            </div>
+        </div>
+    </form>
+</div>
+<th:block th:include="include :: footer" />
+<!-- 引入日期时间选择器JS -->
+<th:block th:include="include :: datetimepicker-js" />
+
+<script type="text/javascript">
+    var prefix = ctx + "monitor/comment";
+
+    // 初始化日期时间选择器
+    $(function() {
+        $("input[name='postTime']").datetimepicker({
+            format: "yyyy-mm-dd hh:ii:ss",
+            autoclose: true
+        });
+    });
+
+    // 提交处理
+    function submitHandler() {
+        if ($.validate.form()) {
+            // 【关键修改】直接提交表单，不再需要JS构建HTML
+            // 后端Service层会负责处理纯文本的content
+            $.operate.save(prefix + "/add", $('#form-comment-add').serialize());
+        }
+    }
+</script>
+</body>
+</html>
