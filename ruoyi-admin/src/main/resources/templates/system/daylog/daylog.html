@@ -43,6 +43,12 @@
 			<a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="system:daylog:remove">
 				<i class="fa fa-trash"></i> 删除
 			</a>
+			<a class="btn btn-info multiple disabled" onclick="archiveSelected()" shiro:hasPermission="system:daylog:archive">
+				<i class="fa fa-archive"></i> 归档
+			</a>
+			<a class="btn btn-secondary" onclick="viewArchived()" shiro:hasPermission="system:daylog:view">
+				<i class="fa fa-folder-open"></i> 查看归档
+			</a>
 			<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="system:daylog:export">
 				<i class="fa fa-download"></i> 导出
 			</a>
@@ -105,6 +111,25 @@
 		};
 		$.table.init(options);
 	});
+
+	// 归档选中的日报
+	function archiveSelected() {
+		var rows = $.table.selectColumns("id");
+		if (rows.length == 0) {
+			$.modal.alertWarning("请至少选择一条记录");
+			return;
+		}
+		$.modal.confirm("确认要归档选中的" + rows.length + "条数据吗？", function() {
+			var url = prefix + "/archive";
+			var data = { "ids": rows.join() };
+			$.operate.submit(url, "post", "json", data);
+		});
+	}
+
+	// 查看归档页面
+	function viewArchived() {
+		window.location.href = prefix + "/archived";
+	}
 </script>
 </body>
 </html>

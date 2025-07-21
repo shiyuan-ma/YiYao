@@ -127,4 +127,67 @@ public class DaylogController extends BaseController
        Long[] commentIds = Convert.toLongArray(ids);
        return toAjax(daylogService.deleteDaylogByIds(commentIds));
    }
+
+   /**
+    * 归档【日报管理】
+    */
+   @RequiresPermissions("system:daylog:archive")
+   @Log(title = "日报管理", businessType = BusinessType.UPDATE)
+   @PostMapping("/archive")
+   @ResponseBody
+   public AjaxResult archive(String ids)
+   {
+       Long[] daylogIds = Convert.toLongArray(ids);
+       return toAjax(daylogService.archiveDaylogByIds(daylogIds));
+   }
+
+   /**
+    * 打开归档日报管理页面
+    */
+   @RequiresPermissions("system:daylog:archived")
+   @GetMapping("/archived")
+   public String archived()
+   {
+       return prefix + "/archived";
+   }
+
+   /**
+    * 查询已归档的【日报管理】列表数据
+    */
+   @RequiresPermissions("system:daylog:archived:list")
+   @PostMapping("/archived/list")
+   @ResponseBody
+   public TableDataInfo archivedList(Daylog daylog)
+   {
+       startPage();
+       List<Daylog> list = daylogService.selectArchivedDaylogList(daylog);
+       return getDataTable(list);
+   }
+
+   /**
+    * 恢复归档的【日报管理】
+    */
+   @RequiresPermissions("system:daylog:restore")
+   @Log(title = "日报管理", businessType = BusinessType.UPDATE)
+   @PostMapping("/restore")
+   @ResponseBody
+   public AjaxResult restore(String ids)
+   {
+       Long[] daylogIds = Convert.toLongArray(ids);
+       return toAjax(daylogService.restoreDaylogByIds(daylogIds));
+   }
+
+   /**
+    * 导出已归档的【日报管理】列表
+    */
+   @RequiresPermissions("system:daylog:export")
+   @Log(title = "归档日报管理", businessType = BusinessType.EXPORT)
+   @PostMapping("/archived/export")
+   @ResponseBody
+   public AjaxResult exportArchived(Daylog daylog)
+   {
+       List<Daylog> list = daylogService.selectArchivedDaylogList(daylog);
+       ExcelUtil<Daylog> util = new ExcelUtil<Daylog>(Daylog.class);
+       return util.exportExcel(list, "归档日报数据");
+   }
 }

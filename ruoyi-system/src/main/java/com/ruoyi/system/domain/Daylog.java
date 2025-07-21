@@ -33,6 +33,10 @@ public class Daylog extends BaseEntity
     @Excel(name = "主题ID")
     private Long topicid;
 
+    /** 是否归档 (0=正常 1=已归档) */
+    @Excel(name = "是否归档")
+    private Integer archived;
+
     public void setId(Long id) 
     {
         this.id = id;
@@ -74,6 +78,16 @@ public class Daylog extends BaseEntity
         return topicid;
     }
 
+    public void setArchived(Integer archived) 
+    {
+        this.archived = archived;
+    }
+
+    public Integer getArchived() 
+    {
+        return archived;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -81,6 +95,7 @@ public class Daylog extends BaseEntity
             .append("text", getText())
             .append("time", getTime())
             .append("topicid", getTopicid())
+            .append("archived", getArchived())
             .toString();
     }
 }

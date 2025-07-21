@@ -98,4 +98,64 @@ public class DaylogServiceImpl implements IDaylogService
     {
         return daylogMapper.deleteDaylogById(id);
     }
+
+    /**
+     * 归档【日报管理】
+     * 
+     * @param id 【日报管理】主键
+     * @return 结果
+     */
+    @Override
+    public int archiveDaylogById(Long id)
+    {
+        return daylogMapper.archiveDaylogById(id);
+    }
+
+    /**
+     * 批量归档【日报管理】
+     * 
+     * @param ids 需要归档的【日报管理】主键集合
+     * @return 结果
+     */
+    @Override
+    public int archiveDaylogByIds(Long[] ids)
+    {
+        return daylogMapper.archiveDaylogByIds(ids);
+    }
+
+    /**
+     * 查询已归档的【日报管理】列表
+     * 
+     * @param daylog 【日报管理】
+     * @return 【日报管理】集合
+     */
+    @Override
+    public List<Daylog> selectArchivedDaylogList(Daylog daylog)
+    {
+        return daylogMapper.selectArchivedDaylogList(daylog);
+    }
+
+    /**
+     * 恢复归档的【日报管理】
+     * 
+     * @param id 【日报管理】主键
+     * @return 结果
+     */
+    @Override
+    public int restoreDaylogById(Long id)
+    {
+        return daylogMapper.restoreDaylogById(id);
+    }
+
+    /**
+     * 批量恢复归档的【日报管理】
+     * 
+     * @param ids 需要恢复的【日报管理】主键集合
+     * @return 结果
+     */
+    @Override
+    public int restoreDaylogByIds(Long[] ids)
+    {
+        return daylogMapper.restoreDaylogByIds(ids);
+    }
 }

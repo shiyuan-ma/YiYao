@@ -9,10 +9,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="text"    column="text"    />
         <result property="time"    column="time"    />
         <result property="topicid"    column="topicid"    />
+        <result property="archived"    column="archived"    />
     </resultMap>
 
     <sql id="selectDaylogVo">
-        select id, text, time, topicid from daylog
+        select id, text, time, topicid, archived from daylog
     </sql>
 
     <select id="selectDaylogList" parameterType="Daylog" resultMap="DaylogResult">
@@ -21,6 +22,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="text != null  and text != ''"> and text = #{text}</if>
             <if test="time != null "> and time = #{time}</if>
             <if test="topicid != null "> and topicid = #{topicid}</if>
+            <!-- 默认只查询未归档的数据 -->
+            and (archived is null or archived = 0)
         </where>
         order by time asc
     </select>
@@ -69,4 +72,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
+    <!-- 归档单个日报 -->
+    <update id="archiveDaylogById" parameterType="Long">
+        update daylog set archived = 1 where id = #{id}
+    </update>
+
+    <!-- 批量归档日报 -->
+    <update id="archiveDaylogByIds" parameterType="String">
+        update daylog set archived = 1 where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- 查询已归档的日报列表 -->
+    <select id="selectArchivedDaylogList" parameterType="Daylog" resultMap="DaylogResult">
+        <include refid="selectDaylogVo"/>
+        <where>  
+            <if test="text != null  and text != ''"> and text = #{text}</if>
+            <if test="time != null "> and time = #{time}</if>
+            <if test="topicid != null "> and topicid = #{topicid}</if>
+            <!-- 只查询已归档的数据 -->
+            and archived = 1
+        </where>
+        order by time desc
+    </select>
+
+    <!-- 恢复单个日报 -->
+    <update id="restoreDaylogById" parameterType="Long">
+        update daylog set archived = 0 where id = #{id}
+    </update>
+
+    <!-- 批量恢复日报 -->
+    <update id="restoreDaylogByIds" parameterType="String">
+        update daylog set archived = 0 where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
 </mapper>

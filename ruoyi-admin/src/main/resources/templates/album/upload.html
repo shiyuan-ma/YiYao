@@ -150,23 +150,26 @@
                         </div>
 
                         <!-- 拖拽上传区域 -->
-                        <div class="upload-area" id="uploadArea">
+                        <div class="upload-area" id="uploadArea" onclick="selectFiles()" style="cursor: pointer;">
                             <div class="upload-content">
-                                <i class="fa fa-cloud-upload"
-                                    style="font-size: 48px; color: #ddd; margin-bottom: 15px;"></i>
+                                <i class="fa fa-cloud-upload" style="font-size: 48px; color: #ddd; margin-bottom: 15px;"></i>
                                 <h4 style="color: #666; margin-bottom: 10px;">拖拽图片或视频到此处上传</h4>
-                                <p style="color: #999; margin-bottom: 20px;">或者点击下方按钮选择文件</p>
+                                <p style="color: #999; margin-bottom: 20px;">或者点击此区域选择文件</p>
 
                                 <div style="margin-bottom: 15px;">
-                                    <input type="file" id="fileInput" multiple accept="image/*,video/*"
-                                        style="display: none;">
-                                    <button type="button" class="btn btn-primary" onclick="selectFiles()">
+                                    <input type="file" id="fileInput" multiple accept="image/*,video/*" style="display: none;">
+                                    <button type="button" class="btn btn-primary" onclick="event.stopPropagation(); selectFiles()">
                                         <i class="fa fa-folder-open"></i> 选择文件
                                     </button>
-                                    <button type="button" class="btn btn-success" onclick="uploadFiles()" id="uploadBtn"
-                                        disabled style="margin-left: 10px;">
+                                    <button type="button" class="btn btn-success" onclick="event.stopPropagation(); uploadFiles()" id="uploadBtn" disabled style="margin-left: 10px;">
                                         <i class="fa fa-upload"></i> 上传文件
                                     </button>
+                                </div>
+                                
+                                <div style="margin-bottom: 15px;">
+                                    <label class="checkbox-inline" style="font-size: 13px; color: #666;">
+                                        <input type="checkbox" id="autoUploadCheckbox" checked> 选择文件后自动上传
+                                    </label>
                                 </div>
 
                                 <div id="fileStatus" class="text-muted">
@@ -219,6 +222,14 @@
             $('#fileInput').change(function () {
                 var files = this.files;
                 updateFileStatus(files);
+                
+                // 检查是否开启自动上传
+                if (document.getElementById('autoUploadCheckbox').checked && files.length > 0) {
+                    // 延迟一点时间让用户看到文件选择的反馈
+                    setTimeout(function() {
+                        uploadFiles();
+                    }, 500);
+                }
             });
 
             // 拖拽上传事件
@@ -514,6 +525,7 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                                 <a href="${url}" target="_blank" class="btn btn-primary">在新窗口打开</a>
+                                <a href="${url}" download="${name}" class="btn btn-success">下载图片</a>
                             </div>
                         </div>
                     </div>
@@ -628,6 +640,14 @@
 
                 // 更新文件状态显示
                 updateFileStatus(files);
+                
+                // 检查是否开启自动上传
+                if (document.getElementById('autoUploadCheckbox').checked && files.length > 0) {
+                    // 延迟一点时间让用户看到文件选择的反馈
+                    setTimeout(function() {
+                        uploadFiles();
+                    }, 500);
+                }
             }
         }
 
