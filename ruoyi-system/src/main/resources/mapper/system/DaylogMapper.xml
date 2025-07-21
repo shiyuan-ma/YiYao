@@ -96,7 +96,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <!-- 只查询已归档的数据 -->
             and archived = 1
         </where>
-        order by time desc
+        order by time asc
     </select>
 
     <!-- 恢复单个日报 -->
