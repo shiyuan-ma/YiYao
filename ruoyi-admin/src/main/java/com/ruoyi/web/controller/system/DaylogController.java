@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.Daylog;
@@ -114,15 +115,16 @@ public class DaylogController extends BaseController
         return toAjax(daylogService.updateDaylog(daylog));
     }
 
-//    /**
-//     * 删除【日报管理】
-//     */
-//    @RequiresPermissions("system:daylog:remove")
-//    @Log(title = "日报管理", businessType = BusinessType.DELETE)
-//    @PostMapping( "/remove") // 改为PostMapping以接收表单提交的ids
-//    @ResponseBody
-//    public AjaxResult remove(String ids) // ids 通常是以逗号分隔的字符串
-//    {
-//        return toAjax(daylogService.deleteDaylogByIds(Long.parseLong(ids)));
-//    }
+   /**
+    * 删除【日报管理】
+    */
+   @RequiresPermissions("system:daylog:remove")
+   @Log(title = "日报管理", businessType = BusinessType.DELETE)
+   @PostMapping( "/remove") // 改为PostMapping以接收表单提交的ids
+   @ResponseBody
+   public AjaxResult remove(String ids) // ids 通常是以逗号分隔的字符串
+   {
+       Long[] commentIds = Convert.toLongArray(ids);
+       return toAjax(daylogService.deleteDaylogByIds(commentIds));
+   }
 }

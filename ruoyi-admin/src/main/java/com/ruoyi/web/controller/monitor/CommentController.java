@@ -65,7 +65,22 @@ public class CommentController extends BaseController {
     @PostMapping("/export")
     @ResponseBody
     public AjaxResult export(Comment comment) {
+        // 应用查询条件时的用户名转换
+        if (comment.getUserName() != null && !comment.getUserName().isEmpty()) {
+            comment.setUserName(AccountEnum.getIdByRemark(comment.getUserName()));
+        }
+        
         List<Comment> list = commentService.selectCommentList(comment);
+        
+        // 导出前进行用户名转换（从ID转换为可读名称）
+        for (Comment comment1 : list) {
+            String userId = comment1.getUserName();
+            if (userId != null && !userId.isEmpty()) {
+                String remark = AccountEnum.getRemarkById(userId);
+                comment1.setUserName(remark);
+            }
+        }
+        
         ExcelUtil<Comment> util = new ExcelUtil<Comment>(Comment.class);
         return util.exportExcel(list, "单位日志数据");
     }

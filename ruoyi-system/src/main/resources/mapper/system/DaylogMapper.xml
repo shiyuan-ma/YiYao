@@ -22,10 +22,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="time != null "> and time = #{time}</if>
             <if test="topicid != null "> and topicid = #{topicid}</if>
         </where>
+        order by time asc
     </select>
 
     <select id="selectDaylogAll" resultMap="DaylogResult">
         <include refid="selectDaylogVo"/>
+        order by time desc
     </select>
     
     <select id="selectDaylogById" parameterType="Long" resultMap="DaylogResult">

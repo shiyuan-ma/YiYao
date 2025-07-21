@@ -17,20 +17,20 @@ public class Daylog extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
-    /** $column.columnComment */
+    /** 日报ID */
+    @Excel(name = "日报ID")
     private Long id;
 
-    /** $column.columnComment */
-    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
+    /** 日报内容 */
+    @Excel(name = "日报内容")
     private String text;
 
-    /** $column.columnComment */
-    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     /** 提交时间 */
+    @Excel(name = "提交时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date time;
 
-    /** $column.columnComment */
-    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
+    /** 主题ID */
+    @Excel(name = "主题ID")
     private Long topicid;
 
     public void setId(Long id) 

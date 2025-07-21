@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.PhotoInfoMapper">
+    
+    <resultMap type="PhotoInfo" id="PhotoInfoResult">
+        <result property="id"    column="id"    />
+        <result property="albumId"    column="album_id"    />
+        <result property="photoName"    column="photo_name"    />
+        <result property="originalName"    column="original_name"    />
+        <result property="filePath"    column="file_path"    />
+        <result property="fileUrl"    column="file_url"    />
+        <result property="fileSize"    column="file_size"    />
+        <result property="fileType"    column="file_type"    />
+        <result property="width"    column="width"    />
+        <result property="height"    column="height"    />
+        <result property="uploadTime"    column="upload_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectPhotoInfoVo">
+        select id, album_id, photo_name, original_name, file_path, file_url, file_size, file_type, width, height, upload_time, create_by, create_time, update_by, update_time, remark from photo_info
+    </sql>
+
+    <select id="selectPhotoInfoList" parameterType="PhotoInfo" resultMap="PhotoInfoResult">
+        <include refid="selectPhotoInfoVo"/>
+        <where>  
+            <if test="albumId != null "> and album_id = #{albumId}</if>
+            <if test="photoName != null  and photoName != ''"> and photo_name like concat('%', #{photoName}, '%')</if>
+            <if test="originalName != null  and originalName != ''"> and original_name like concat('%', #{originalName}, '%')</if>
+            <if test="fileType != null  and fileType != ''"> and file_type = #{fileType}</if>
+        </where>
+        order by upload_time desc
+    </select>
+    
+    <select id="selectPhotoInfoById" parameterType="Long" resultMap="PhotoInfoResult">
+        <include refid="selectPhotoInfoVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectPhotoInfoByAlbumId" parameterType="Long" resultMap="PhotoInfoResult">
+        <include refid="selectPhotoInfoVo"/>
+        where album_id = #{albumId}
+        order by upload_time desc
+    </select>
+
+    <select id="countPhotoByAlbumId" parameterType="Long" resultType="int">
+        select count(*) from photo_info where album_id = #{albumId}
+    </select>
+        
+    <insert id="insertPhotoInfo" parameterType="PhotoInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into photo_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="albumId != null">album_id,</if>
+            <if test="photoName != null and photoName != ''">photo_name,</if>
+            <if test="originalName != null">original_name,</if>
+            <if test="filePath != null and filePath != ''">file_path,</if>
+            <if test="fileUrl != null and fileUrl != ''">file_url,</if>
+            <if test="fileSize != null">file_size,</if>
+            <if test="fileType != null">file_type,</if>
+            <if test="width != null">width,</if>
+            <if test="height != null">height,</if>
+            <if test="uploadTime != null">upload_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="albumId != null">#{albumId},</if>
+            <if test="photoName != null and photoName != ''">#{photoName},</if>
+            <if test="originalName != null">#{originalName},</if>
+            <if test="filePath != null and filePath != ''">#{filePath},</if>
+            <if test="fileUrl != null and fileUrl != ''">#{fileUrl},</if>
+            <if test="fileSize != null">#{fileSize},</if>
+            <if test="fileType != null">#{fileType},</if>
+            <if test="width != null">#{width},</if>
+            <if test="height != null">#{height},</if>
+            <if test="uploadTime != null">#{uploadTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePhotoInfo" parameterType="PhotoInfo">
+        update photo_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="albumId != null">album_id = #{albumId},</if>
+            <if test="photoName != null and photoName != ''">photo_name = #{photoName},</if>
+            <if test="originalName != null">original_name = #{originalName},</if>
+            <if test="filePath != null and filePath != ''">file_path = #{filePath},</if>
+            <if test="fileUrl != null and fileUrl != ''">file_url = #{fileUrl},</if>
+            <if test="fileSize != null">file_size = #{fileSize},</if>
+            <if test="fileType != null">file_type = #{fileType},</if>
+            <if test="width != null">width = #{width},</if>
+            <if test="height != null">height = #{height},</if>
+            <if test="uploadTime != null">upload_time = #{uploadTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deletePhotoInfoById" parameterType="Long">
+        delete from photo_info where id = #{id}
+    </delete>
+
+    <delete id="deletePhotoInfoByIds" parameterType="String">
+        delete from photo_info where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

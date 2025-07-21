@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.PhotoAlbumMapper">
+    
+    <resultMap type="PhotoAlbum" id="PhotoAlbumResult">
+        <result property="id"    column="id"    />
+        <result property="albumName"    column="album_name"    />
+        <result property="description"    column="description"    />
+        <result property="coverImage"    column="cover_image"    />
+        <result property="photoCount"    column="photo_count"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectPhotoAlbumVo">
+        select id, album_name, description, cover_image, photo_count, create_by, create_time, update_by, update_time, remark from photo_album
+    </sql>
+
+    <select id="selectPhotoAlbumList" parameterType="PhotoAlbum" resultMap="PhotoAlbumResult">
+        <include refid="selectPhotoAlbumVo"/>
+        <where>  
+            <if test="albumName != null  and albumName != ''"> and album_name like concat('%', #{albumName}, '%')</if>
+            <if test="description != null  and description != ''"> and description like concat('%', #{description}, '%')</if>
+        </where>
+        order by create_time desc
+    </select>
+    
+    <select id="selectPhotoAlbumById" parameterType="Long" resultMap="PhotoAlbumResult">
+        <include refid="selectPhotoAlbumVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertPhotoAlbum" parameterType="PhotoAlbum" useGeneratedKeys="true" keyProperty="id">
+        insert into photo_album
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="albumName != null and albumName != ''">album_name,</if>
+            <if test="description != null">description,</if>
+            <if test="coverImage != null">cover_image,</if>
+            <if test="photoCount != null">photo_count,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="albumName != null and albumName != ''">#{albumName},</if>
+            <if test="description != null">#{description},</if>
+            <if test="coverImage != null">#{coverImage},</if>
+            <if test="photoCount != null">#{photoCount},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePhotoAlbum" parameterType="PhotoAlbum">
+        update photo_album
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="albumName != null and albumName != ''">album_name = #{albumName},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="coverImage != null">cover_image = #{coverImage},</if>
+            <if test="photoCount != null">photo_count = #{photoCount},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updatePhotoCount">
+        update photo_album set photo_count = #{count} where id = #{albumId}
+    </update>
+
+    <delete id="deletePhotoAlbumById" parameterType="Long">
+        delete from photo_album where id = #{id}
+    </delete>
+
+    <delete id="deletePhotoAlbumByIds" parameterType="String">
+        delete from photo_album where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

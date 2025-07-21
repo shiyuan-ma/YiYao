@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<head>
+    <th:block th:include="include :: header('照片上传')" />
+
+    <style>
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .photo-item {
+            position: relative;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .photo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .photo-item img,
+        .photo-item video {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .video-play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: white;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .photo-info {
+            padding: 10px;
+        }
+
+        .photo-name {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .photo-size {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .photo-actions {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .photo-item:hover .photo-actions {
+            opacity: 1;
+        }
+
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            background: #fafafa;
+            margin-bottom: 20px;
+        }
+
+        .upload-area.dragover {
+            border-color: #1ab394;
+            background: #f0f9ff;
+        }
+
+        .mobile-upload-tip {
+            background: #e7f3ff;
+            border: 1px solid #b3d8ff;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #0066cc;
+        }
+
+        @media (max-width: 768px) {
+            .photo-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+            }
+
+            .photo-item img {
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+
+<body class="gray-bg">
+    <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>照片上传管理</h5>
+                        <div class="ibox-tools">
+                            <select id="albumSelect" class="form-control" style="width: 200px; display: inline-block;">
+                                <option value="">选择相册</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+                        <!-- 手机上传提示 -->
+                        <div class="mobile-upload-tip">
+                            <i class="fa fa-info-circle"></i>
+                            <strong>手机用户提示：</strong>点击下方上传按钮可直接从手机相册选择多张照片和视频进行批量上传
+                        </div>
+
+                        <!-- 拖拽上传区域 -->
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-content">
+                                <i class="fa fa-cloud-upload"
+                                    style="font-size: 48px; color: #ddd; margin-bottom: 15px;"></i>
+                                <h4 style="color: #666; margin-bottom: 10px;">拖拽图片或视频到此处上传</h4>
+                                <p style="color: #999; margin-bottom: 20px;">或者点击下方按钮选择文件</p>
+
+                                <div style="margin-bottom: 15px;">
+                                    <input type="file" id="fileInput" multiple accept="image/*,video/*"
+                                        style="display: none;">
+                                    <button type="button" class="btn btn-primary" onclick="selectFiles()">
+                                        <i class="fa fa-folder-open"></i> 选择文件
+                                    </button>
+                                    <button type="button" class="btn btn-success" onclick="uploadFiles()" id="uploadBtn"
+                                        disabled style="margin-left: 10px;">
+                                        <i class="fa fa-upload"></i> 上传文件
+                                    </button>
+                                </div>
+
+                                <div id="fileStatus" class="text-muted">
+                                    支持图片（JPG、PNG、GIF）和视频（MP4、AVI、MOV）格式，单个文件最大999MB，最多20个文件
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 照片展示区域 -->
+                        <div id="photoGallery" class="photo-gallery">
+                            <!-- 照片将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:include="include :: footer" />
+
+    <script th:inline="javascript">
+        var uploadPermission = [[${@permission.hasPermi('album:upload:add') }]];
+        var removePermission = [[${@permission.hasPermi('album:upload:remove') }]];
+        var currentAlbumId = null;
+
+        $(function () {
+            // 加载相册列表
+            loadAlbums();
+
+            // 获取URL参数中的相册ID
+            var urlParams = new URLSearchParams(window.location.search);
+            var albumId = urlParams.get('albumId');
+            if (albumId) {
+                $('#albumSelect').val(albumId);
+                currentAlbumId = albumId;
+                loadPhotos(albumId);
+            }
+
+            // 相册选择事件
+            $('#albumSelect').change(function () {
+                currentAlbumId = $(this).val();
+                if (currentAlbumId) {
+                    loadPhotos(currentAlbumId);
+                } else {
+                    $('#photoGallery').empty();
+                }
+            });
+
+            // 文件选择事件
+            $('#fileInput').change(function () {
+                var files = this.files;
+                updateFileStatus(files);
+            });
+
+            // 拖拽上传事件
+            initDragUpload();
+        });
+
+        function loadAlbums() {
+            console.log('Loading albums from:', ctx + 'album/list/all');
+            $.get(ctx + 'album/list/all', function (result) {
+                console.log('Albums response:', result);
+                // 修复：若依框架成功状态码是0，不是200
+                if (result.code === 0 || result.code === 200) {
+                    var select = $('#albumSelect');
+                    select.empty().append('<option value="">选择相册</option>');
+                    if (result.data && result.data.length > 0) {
+                        $.each(result.data, function (index, album) {
+                            select.append('<option value="' + album.id + '">' + album.albumName + '</option>');
+                        });
+                        console.log('Loaded ' + result.data.length + ' albums');
+
+                        // 默认选择第一个相册
+                        if (!currentAlbumId && result.data.length > 0) {
+                            var firstAlbum = result.data[0];
+                            select.val(firstAlbum.id);
+                            currentAlbumId = firstAlbum.id;
+                            loadPhotos(firstAlbum.id);
+                            console.log('Auto selected first album:', firstAlbum.albumName);
+                        }
+                    } else {
+                        console.log('No albums found');
+                        select.append('<option value="">暂无相册</option>');
+                    }
+                } else {
+                    console.error('Failed to load albums:', result.msg);
+                    $.modal.msgError('加载相册失败：' + (result.msg || '未知错误'));
+                }
+            }).fail(function (xhr, status, error) {
+                console.error('Ajax error loading albums:', error, xhr.responseText);
+                $.modal.msgError('加载相册失败，请检查权限设置');
+            });
+        }
+
+        // 选择文件函数
+        function selectFiles() {
+            document.getElementById('fileInput').click();
+        }
+
+        // 更新文件状态显示
+        function updateFileStatus(files) {
+            var statusElement = document.getElementById('fileStatus');
+            var uploadBtn = document.getElementById('uploadBtn');
+
+            if (files.length === 0) {
+                statusElement.textContent = '支持图片（JPG、PNG、GIF）和视频（MP4、AVI、MOV）格式，单个文件最大999MB，最多20个文件';
+                statusElement.className = 'text-muted';
+                uploadBtn.disabled = true;
+                return;
+            }
+
+            if (files.length > 20) {
+                statusElement.textContent = '选择的文件过多，最多只能选择20个文件';
+                statusElement.className = 'text-danger';
+                uploadBtn.disabled = true;
+                return;
+            }
+
+            var validFiles = 0;
+            var invalidFiles = 0;
+            var imageCount = 0;
+            var videoCount = 0;
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                if (file.type.startsWith('image/')) {
+                    validFiles++;
+                    imageCount++;
+                } else if (file.type.startsWith('video/')) {
+                    validFiles++;
+                    videoCount++;
+                } else {
+                    invalidFiles++;
+                }
+            }
+
+            if (invalidFiles > 0) {
+                statusElement.textContent = '已选择 ' + imageCount + ' 张图片和 ' + videoCount + ' 个视频，' + invalidFiles + ' 个不支持的文件将被忽略';
+                statusElement.className = 'text-warning';
+            } else {
+                var fileTypeText = '';
+                if (imageCount > 0 && videoCount > 0) {
+                    fileTypeText = imageCount + ' 张图片和 ' + videoCount + ' 个视频';
+                } else if (imageCount > 0) {
+                    fileTypeText = imageCount + ' 张图片';
+                } else if (videoCount > 0) {
+                    fileTypeText = videoCount + ' 个视频';
+                }
+                statusElement.textContent = '已选择 ' + fileTypeText + '，准备上传';
+                statusElement.className = 'text-success';
+            }
+
+            uploadBtn.disabled = validFiles === 0;
+        }
+
+        // 上传文件函数
+        function uploadFiles() {
+            console.log('=== 开始上传文件 ===');
+            console.log('当前相册ID:', currentAlbumId);
+
+            if (!currentAlbumId) {
+                $.modal.msgWarning('请先选择相册');
+                return;
+            }
+
+            var fileInput = document.getElementById('fileInput');
+            var files = fileInput.files;
+            console.log('选择的文件数量:', files.length);
+
+            if (files.length === 0) {
+                $.modal.msgWarning('请先选择文件');
+                return;
+            }
+
+            var formData = new FormData();
+            var validFileCount = 0;
+
+            // 添加图片和视频文件
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                console.log('文件', i + 1, ':', file.name, '类型:', file.type, '大小:', file.size);
+                if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                    formData.append('files', file);
+                    validFileCount++;
+                }
+            }
+
+            console.log('有效文件数量:', validFileCount);
+
+            if (validFileCount === 0) {
+                $.modal.msgError('没有有效的图片或视频文件');
+                return;
+            }
+
+            formData.append('albumId', currentAlbumId);
+            console.log('FormData已准备完成，开始发送请求...');
+
+            // 禁用上传按钮，显示上传状态
+            var uploadBtn = document.getElementById('uploadBtn');
+            var statusElement = document.getElementById('fileStatus');
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 上传中...';
+            statusElement.textContent = '正在上传 ' + validFileCount + ' 个文件...';
+            statusElement.className = 'text-info';
+
+            $.ajax({
+                url: ctx + 'album/upload/batch',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function (xhr) {
+                    console.log('发送请求到:', ctx + 'album/upload/batch');
+                },
+                success: function (result) {
+                    console.log('上传响应:', result);
+                    if (result.code === 0 || result.code === 200) {
+                        $.modal.msgSuccess(result.msg);
+                        // 重新加载照片列表
+                        if (currentAlbumId) {
+                            loadPhotos(currentAlbumId);
+                        }
+                        // 清空文件选择
+                        fileInput.value = '';
+                        updateFileStatus([]);
+                    } else {
+                        console.error('上传失败，错误码:', result.code, '错误信息:', result.msg);
+                        $.modal.msgError(result.msg || '上传失败');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Ajax请求失败:');
+                    console.error('状态:', status);
+                    console.error('错误:', error);
+                    console.error('响应文本:', xhr.responseText);
+                    console.error('状态码:', xhr.status);
+                    $.modal.msgError('上传失败：' + error + ' (状态码: ' + xhr.status + ')');
+                },
+                complete: function () {
+                    console.log('请求完成，恢复按钮状态');
+                    // 恢复上传按钮状态
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerHTML = '<i class="fa fa-upload"></i> 上传文件';
+                }
+            });
+        }
+
+        function loadPhotos(albumId) {
+            $.get(ctx + 'album/upload/album/' + albumId, function (result) {
+                if (result.code === 0 || result.code === 200) {
+                    displayPhotos(result.data);
+                }
+            });
+        }
+
+        function displayPhotos(photos) {
+            var gallery = $('#photoGallery');
+            gallery.empty();
+
+            if (photos.length === 0) {
+                gallery.append('<div class="text-center text-muted" style="grid-column: 1/-1; padding: 40px;">暂无文件</div>');
+                return;
+            }
+
+            $.each(photos, function (index, photo) {
+                var deleteButton = removePermission ?
+                    '<button class="btn btn-danger btn-xs" onclick="deletePhoto(' + photo.id + ')" title="删除文件"><i class="fa fa-trash"></i></button>' :
+                    '<button class="btn btn-danger btn-xs" onclick="deletePhoto(' + photo.id + ')" title="删除文件"><i class="fa fa-trash"></i></button>';
+
+                // 判断是否为视频文件
+                var isVideo = isVideoFile(photo.originalName || photo.photoName);
+                var mediaHtml = '';
+                var clickHandler = '';
+
+                if (isVideo) {
+                    // 视频文件显示
+                    mediaHtml = `
+                        <video src="${photo.fileUrl}" style="cursor: pointer;" muted>
+                            您的浏览器不支持视频播放
+                        </video>
+                        <div class="video-play-icon">
+                            <i class="fa fa-play"></i>
+                        </div>
+                        <div class="video-overlay">视频</div>
+                    `;
+                    clickHandler = `onclick="previewVideo('${photo.fileUrl}', '${photo.photoName || photo.originalName}')"`;
+                } else {
+                    // 图片文件显示
+                    mediaHtml = `<img src="${photo.fileUrl}" alt="${photo.photoName}" style="cursor: pointer;">`;
+                    clickHandler = `onclick="previewImage('${photo.fileUrl}', '${photo.photoName || photo.originalName}')"`;
+                }
+
+                var photoHtml = `
+                    <div class="photo-item" data-id="${photo.id}">
+                        <div ${clickHandler}>
+                            ${mediaHtml}
+                        </div>
+                        <div class="photo-actions">
+                            ${deleteButton}
+                        </div>
+                        <div class="photo-info">
+                            <div class="photo-name" title="${photo.originalName}">${photo.originalName}</div>
+                            <div class="photo-size">${formatFileSize(photo.fileSize)} ${photo.width && photo.height ? '| ' + photo.width + '×' + photo.height : ''}</div>
+                        </div>
+                    </div>
+                `;
+                gallery.append(photoHtml);
+            });
+        }
+
+        function deletePhoto(photoId) {
+            $.modal.confirm('确定要删除这张照片吗？', function () {
+                $.ajax({
+                    url: ctx + 'album/upload/' + photoId,
+                    type: 'DELETE',
+                    success: function (result) {
+                        if (result.code === 0 || result.code === 200) {
+                            $.modal.msgSuccess('删除成功');
+                            if (currentAlbumId) {
+                                loadPhotos(currentAlbumId);
+                            }
+                        } else {
+                            $.modal.msgError(result.msg);
+                        }
+                    }
+                });
+            });
+        }
+
+        function previewImage(url, name) {
+            // 创建模态框HTML
+            var modalHtml = `
+                <div class="modal fade" id="imagePreviewModal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <h4 class="modal-title">${name}</h4>
+                            </div>
+                            <div class="modal-body text-center">
+                                <img src="${url}" style="max-width: 100%; max-height: 70vh;" alt="${name}">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                <a href="${url}" target="_blank" class="btn btn-primary">在新窗口打开</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 移除已存在的模态框
+            $('#imagePreviewModal').remove();
+
+            // 添加新的模态框并显示
+            $('body').append(modalHtml);
+            $('#imagePreviewModal').modal('show');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            var k = 1024;
+            var sizes = ['B', 'KB', 'MB', 'GB'];
+            var i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 判断是否为视频文件
+        function isVideoFile(filename) {
+            if (!filename) return false;
+            var videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v'];
+            var ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+            return videoExtensions.includes(ext);
+        }
+
+        // 视频预览函数
+        function previewVideo(url, name) {
+            // 创建视频预览模态框HTML
+            var modalHtml = `
+                <div class="modal fade" id="videoPreviewModal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <h4 class="modal-title">${name}</h4>
+                            </div>
+                            <div class="modal-body text-center">
+                                <video controls style="max-width: 100%; max-height: 70vh;" preload="metadata">
+                                    <source src="${url}" type="video/mp4">
+                                    <source src="${url}" type="video/webm">
+                                    <source src="${url}" type="video/ogg">
+                                    您的浏览器不支持视频播放
+                                </video>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                <a href="${url}" target="_blank" class="btn btn-primary">在新窗口打开</a>
+                                <a href="${url}" download="${name}" class="btn btn-success">下载视频</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 移除已存在的模态框
+            $('#videoPreviewModal').remove();
+
+            // 添加新的模态框并显示
+            $('body').append(modalHtml);
+            $('#videoPreviewModal').modal('show');
+        }
+
+        // 初始化拖拽上传功能
+        function initDragUpload() {
+            var uploadArea = document.getElementById('uploadArea');
+            var fileInput = document.getElementById('fileInput');
+
+            // 阻止默认的拖拽行为
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            // 高亮拖拽区域
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            // 处理文件拖拽
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function highlight(e) {
+                uploadArea.classList.add('dragover');
+            }
+
+            function unhighlight(e) {
+                uploadArea.classList.remove('dragover');
+            }
+
+            function handleDrop(e) {
+                var dt = e.dataTransfer;
+                var files = dt.files;
+
+                // 将拖拽的文件设置到文件输入框
+                fileInput.files = files;
+
+                // 更新文件状态显示
+                updateFileStatus(files);
+            }
+        }
+
+        // 处理拖拽文件的函数
+        function handleDragFiles(files) {
+            // 创建一个新的FileList对象（模拟）
+            var fileInput = document.getElementById('fileInput');
+
+            // 由于FileList是只读的，我们需要创建一个新的input元素
+            var newInput = document.createElement('input');
+            newInput.type = 'file';
+            newInput.multiple = true;
+            newInput.accept = 'image/*,video/*';
+            newInput.style.display = 'none';
+
+            // 创建DataTransfer对象来设置files
+            var dt = new DataTransfer();
+            for (var i = 0; i < files.length; i++) {
+                dt.items.add(files[i]);
+            }
+
+            newInput.files = dt.files;
+
+            // 替换原来的input
+            fileInput.parentNode.replaceChild(newInput, fileInput);
+            newInput.id = 'fileInput';
+
+            // 添加change事件监听器
+            newInput.addEventListener('change', function () {
+                updateFileStatus(this.files);
+            });
+
+            // 更新文件状态
+            updateFileStatus(files);
+        }
+
+    </script>
+</body>
+
+</html>

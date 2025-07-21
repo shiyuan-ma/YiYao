@@ -169,7 +169,8 @@ public enum AccountEnum {
     I5DFfH0N8HdH5beSfbz("I5DFfH0N8HdH5beSfbz", "孙福弟"),
     xKFP1CAgRIFXNMGFgd1("xKFP1CAgRIFXNMGFgd1", "丁桂峰"),
     qrBN6O8VzQlOmpHZrt8("qrBN6O8VzQlOmpHZrt8", "高扬"),
-    R3JhRwTUwNoUQnbGGSW("R3JhRwTUwNoUQnbGGSW", "王晓燕");
+    R3JhRwTUwNoUQnbGGSW("R3JhRwTUwNoUQnbGGSW", "王晓燕"),
+    vfzwA5tgSAxmsjCfEHa("vfzwA5tgSAxmsjCfEHa", "崔兮");
 
     private final String id;
     private final String remark;
