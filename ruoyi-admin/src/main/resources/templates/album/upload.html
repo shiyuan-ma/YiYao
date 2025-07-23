@@ -5,6 +5,38 @@
     <th:block th:include="include :: header('照片上传')" />
 
     <style>
+        /* --- 新增的懒加载优化样式 --- */
+        .lazy-image-container {
+            position: relative;
+            width: 100%;
+            /* 保持16:9的比例，可以根据您的图片常见比例调整 */
+            padding-top: 56.25%;
+            background-color: #f0f0f0; /* 优雅的灰色占位背景 */
+        }
+
+        .lazy-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* 初始状态：完全模糊 */
+            filter: blur(20px);
+            /* 加载完成后的过渡效果 */
+            transition: filter 0.5s ease-in-out;
+        }
+
+        .lazy-image.loaded {
+            /* 加载完成：移除模糊 */
+            filter: blur(0);
+        }
+
+        /* 视频不需要模糊效果，保持原样 */
+        .photo-item video {
+            background-color: #000;
+        }
+
         .photo-gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -334,7 +366,10 @@
         }
 
         // 上传文件函数
-        function uploadFiles() {
+        // 使用下面的版本完整替换您现有的 uploadFiles 函数
+
+        // 使函数变为 async 以便使用 await
+        async function uploadFiles() {
             console.log('=== 开始上传文件 ===');
             console.log('当前相册ID:', currentAlbumId);
 
@@ -345,85 +380,124 @@
 
             var fileInput = document.getElementById('fileInput');
             var files = fileInput.files;
-            console.log('选择的文件数量:', files.length);
-
             if (files.length === 0) {
                 $.modal.msgWarning('请先选择文件');
                 return;
             }
 
-            var formData = new FormData();
-            var validFileCount = 0;
-
-            // 添加图片和视频文件
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
-                console.log('文件', i + 1, ':', file.name, '类型:', file.type, '大小:', file.size);
-                if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-                    formData.append('files', file);
-                    validFileCount++;
-                }
-            }
-
-            console.log('有效文件数量:', validFileCount);
-
-            if (validFileCount === 0) {
-                $.modal.msgError('没有有效的图片或视频文件');
-                return;
-            }
-
-            formData.append('albumId', currentAlbumId);
-            console.log('FormData已准备完成，开始发送请求...');
-
-            // 禁用上传按钮，显示上传状态
             var uploadBtn = document.getElementById('uploadBtn');
             var statusElement = document.getElementById('fileStatus');
+
+            // 禁用按钮并更新状态为“验证中”
             uploadBtn.disabled = true;
-            uploadBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 上传中...';
-            statusElement.textContent = '正在上传 ' + validFileCount + ' 个文件...';
+            uploadBtn.innerHTML = '<i class="fa fa-shield"></i> 验证文件中...';
+            statusElement.textContent = '正在检查重复文件，请稍候...';
             statusElement.className = 'text-info';
 
-            $.ajax({
-                url: ctx + 'album/upload/batch',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                beforeSend: function (xhr) {
-                    console.log('发送请求到:', ctx + 'album/upload/batch');
-                },
-                success: function (result) {
-                    console.log('上传响应:', result);
-                    if (result.code === 0 || result.code === 200) {
-                        $.modal.msgSuccess(result.msg);
-                        // 重新加载照片列表
-                        if (currentAlbumId) {
-                            loadPhotos(currentAlbumId);
-                        }
-                        // 清空文件选择
-                        fileInput.value = '';
-                        updateFileStatus([]);
-                    } else {
-                        console.error('上传失败，错误码:', result.code, '错误信息:', result.msg);
-                        $.modal.msgError(result.msg || '上传失败');
+            try {
+                // 1. 从后端获取当前相册已存在的哈希列表
+                const response = await $.get(ctx + 'album/upload/hashes/' + currentAlbumId);
+                if (response.code !== 0 && response.code !== 200) {
+                    throw new Error('获取文件哈希列表失败: ' + response.msg);
+                }
+                const existingHashes = new Set(response.data || []);
+                console.log(`获取到 ${existingHashes.size} 个已存在的哈希值。`);
+
+                // 2. 遍历选中的文件，计算哈希并进行过滤
+                const filesToUpload = [];
+                const duplicateFiles = [];
+                const localHashes = new Set(); // 用于检查本次选择内的重复
+
+                for (const file of files) {
+                    // 只处理图片和视频
+                    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                        continue;
                     }
-                },
-                error: function (xhr, status, error) {
-                    console.error('Ajax请求失败:');
-                    console.error('状态:', status);
-                    console.error('错误:', error);
-                    console.error('响应文本:', xhr.responseText);
-                    console.error('状态码:', xhr.status);
-                    $.modal.msgError('上传失败：' + error + ' (状态码: ' + xhr.status + ')');
-                },
-                complete: function () {
-                    console.log('请求完成，恢复按钮状态');
-                    // 恢复上传按钮状态
+
+                    statusElement.textContent = `正在验证: ${file.name}`;
+                    const hash = await calculateFileHash(file);
+                    console.log(`文件: ${file.name}, 哈希: ${hash.substring(0, 10)}...`);
+
+                    // 检查哈希是否已存在 (在服务器上或在本次选择中)
+                    if (existingHashes.has(hash) || localHashes.has(hash)) {
+                        duplicateFiles.push(file.name);
+                    } else {
+                        filesToUpload.push({ file: file, hash: hash });
+                        localHashes.add(hash);
+                    }
+                }
+
+                // 3. 处理验证结果
+                if (filesToUpload.length === 0) {
+                    const message = files.length === duplicateFiles.length
+                        ? `所有 ${files.length} 个文件都已存在于相册中，无需上传。`
+                        : '没有有效的、不重复的文件可供上传。';
+                    $.modal.msgWarning(message);
+                    statusElement.textContent = message;
+                    statusElement.className = 'text-warning';
+                    // 清空文件选择
+                    fileInput.value = '';
+                    // 恢复按钮状态
                     uploadBtn.disabled = false;
                     uploadBtn.innerHTML = '<i class="fa fa-upload"></i> 上传文件';
+                    return;
                 }
-            });
+
+                // 4. 构建 FormData 并上传
+                var formData = new FormData();
+                formData.append('albumId', currentAlbumId);
+                filesToUpload.forEach(item => {
+                    formData.append('files', item.file);
+                    // 可以在这里将哈希也传给后端，虽然后端也会自己算，但可以用于日志等
+                    // formData.append('hashes', item.hash);
+                });
+
+                const uploadCount = filesToUpload.length;
+                let statusMsg = `共 ${uploadCount} 个新文件准备上传。`;
+                if (duplicateFiles.length > 0) {
+                    statusMsg += ` 已自动跳过 ${duplicateFiles.length} 个重复文件。`;
+                }
+                statusElement.textContent = statusMsg;
+                uploadBtn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> 上传中 (${uploadCount})...`;
+
+                // 5. 发送 Ajax 请求
+                $.ajax({
+                    url: ctx + 'album/upload/batch',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (result) {
+                        if (result.code === 0 || result.code === 200) {
+                            $.modal.msgSuccess(result.msg);
+                            if (currentAlbumId) {
+                                loadPhotos(currentAlbumId);
+                            }
+                            fileInput.value = '';
+                            updateFileStatus([]);
+                        } else {
+                            $.modal.msgError(result.msg || '上传失败');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $.modal.msgError('上传失败：' + error + ' (状态码: ' + xhr.status + ')');
+                    },
+                    complete: function () {
+                        uploadBtn.disabled = false;
+                        uploadBtn.innerHTML = '<i class="fa fa-upload"></i> 上传文件';
+                    }
+                });
+
+            } catch (error) {
+                console.error('文件验证或上传过程中发生错误:', error);
+                $.modal.msgError(error.message || '操作失败，请检查网络或联系管理员。');
+                statusElement.textContent = '验证失败，请重试。';
+                statusElement.className = 'text-danger';
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fa fa-upload"></i> 上传文件';
+            }
         }
+
 
         function loadPhotos(albumId) {
             $.get(ctx + 'album/upload/album/' + albumId, function (result) {
@@ -432,6 +506,8 @@
                 }
             });
         }
+
+        // 找到 displayPhotos 函数，用下面的代码完全替换它
 
         function displayPhotos(photos) {
             var gallery = $('#photoGallery');
@@ -443,50 +519,111 @@
             }
 
             $.each(photos, function (index, photo) {
+                // 调试信息：打印缩略图URL
+                console.log('Photo:', photo.photoName, 'Original URL:', photo.fileUrl, 'Thumbnail URL:', photo.thumbnailUrl);
                 var deleteButton = removePermission ?
                     '<button class="btn btn-danger btn-xs" onclick="deletePhoto(' + photo.id + ')" title="删除文件"><i class="fa fa-trash"></i></button>' :
                     '<button class="btn btn-danger btn-xs" onclick="deletePhoto(' + photo.id + ')" title="删除文件"><i class="fa fa-trash"></i></button>';
 
-                // 判断是否为视频文件
                 var isVideo = isVideoFile(photo.originalName || photo.photoName);
                 var mediaHtml = '';
                 var clickHandler = '';
 
                 if (isVideo) {
-                    // 视频文件显示
+                    // 视频不需要懒加载优化，保持原样即可
                     mediaHtml = `
-                        <video src="${photo.fileUrl}" style="cursor: pointer;" muted>
-                            您的浏览器不支持视频播放
-                        </video>
-                        <div class="video-play-icon">
-                            <i class="fa fa-play"></i>
-                        </div>
-                        <div class="video-overlay">视频</div>
-                    `;
+                <video src="${photo.fileUrl}" style="cursor: pointer;" muted preload="metadata">
+                    您的浏览器不支持视频播放
+                </video>
+                <div class="video-play-icon">
+                    <i class="fa fa-play"></i>
+                </div>
+                <div class="video-overlay">视频</div>
+            `;
                     clickHandler = `onclick="previewVideo('${photo.fileUrl}', '${photo.photoName || photo.originalName}')"`;
                 } else {
-                    // 图片文件显示
-                    mediaHtml = `<img src="${photo.fileUrl}" alt="${photo.photoName}" style="cursor: pointer;">`;
+                    // ⭐⭐⭐ 图片懒加载优化 - 使用缩略图显示，点击查看原图 ⭐⭐⭐
+                    // 优先使用缩略图URL，如果没有缩略图则使用原图
+                    var displayUrl = photo.thumbnailUrl || photo.fileUrl;
+                    // 真实图片URL存放在 data-src 中
+                    // src 使用一个1x1的透明gif作为占位符，防止显示破图图标
+                    mediaHtml = `
+                <div class="lazy-image-container">
+                    <img class="lazy-image"
+                         src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                         data-src="${displayUrl}"
+                         alt="${photo.photoName}"
+                         style="cursor: pointer;">
+                </div>
+            `;
+                    // 点击时预览原图，而不是缩略图
                     clickHandler = `onclick="previewImage('${photo.fileUrl}', '${photo.photoName || photo.originalName}')"`;
                 }
 
                 var photoHtml = `
-                    <div class="photo-item" data-id="${photo.id}">
-                        <div ${clickHandler}>
-                            ${mediaHtml}
-                        </div>
-                        <div class="photo-actions">
-                            ${deleteButton}
-                        </div>
-                        <div class="photo-info">
-                            <div class="photo-name" title="${photo.originalName}">${photo.originalName}</div>
-                            <div class="photo-size">${formatFileSize(photo.fileSize)} ${photo.width && photo.height ? '| ' + photo.width + '×' + photo.height : ''}</div>
-                        </div>
-                    </div>
-                `;
+            <div class="photo-item" data-id="${photo.id}">
+                <div ${clickHandler}>
+                    ${mediaHtml}
+                </div>
+                <div class="photo-actions">
+                    ${deleteButton}
+                </div>
+                <div class="photo-info">
+                    <div class="photo-name" title="${photo.originalName}">${photo.originalName}</div>
+                    <div class="photo-size">${formatFileSize(photo.fileSize)} ${photo.width && photo.height ? '| ' + photo.width + '×' + photo.height : ''}</div>
+                </div>
+            </div>
+        `;
                 gallery.append(photoHtml);
             });
+
+            // ⭐ 所有图片DOM都创建完毕后，初始化懒加载
+            initLazyLoading();
         }
+
+        // ⭐⭐⭐ 全新的懒加载初始化函数 ⭐⭐⭐
+        function initLazyLoading() {
+            // 选取所有需要懒加载的图片
+            const lazyImages = document.querySelectorAll('.lazy-image');
+
+            // 如果浏览器不支持 IntersectionObserver，则直接加载所有图片
+            if (!('IntersectionObserver' in window)) {
+                lazyImages.forEach(img => {
+                    img.src = img.dataset.src;
+                    img.classList.add('loaded');
+                });
+                return;
+            }
+
+            // 创建一个观察者
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    // 如果图片进入了可视区域
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+
+                        // 将真实的URL赋给src，开始加载图片
+                        img.src = img.dataset.src;
+
+                        // 图片加载完成后，添加 'loaded' 类来触发CSS过渡效果
+                        img.onload = () => {
+                            img.classList.add('loaded');
+                        };
+
+                        // 已经加载过的图片，不再需要观察
+                        observer.unobserve(img);
+                    }
+                });
+            }, {
+                // rootMargin: '50px' // 可以预加载距离视口还有50px的图片
+            });
+
+            // 让观察者开始观察每一张懒加载图片
+            lazyImages.forEach(img => {
+                observer.observe(img);
+            });
+        }
+
 
         function deletePhoto(photoId) {
             $.modal.confirm('确定要删除这张照片吗？', function () {
@@ -683,6 +820,37 @@
             // 更新文件状态
             updateFileStatus(files);
         }
+
+        /**
+         * 使用浏览器的 Crypto API 异步计算文件的 SHA-256 哈希值
+         * @param {File} file - 要计算哈希值的文件对象
+         * @returns {Promise<string>} - 一个解析为64位十六进制哈希字符串的 Promise
+         */
+        function calculateFileHash(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+
+                reader.onload = (event) => {
+                    // 文件读取完成，开始计算哈希
+                    window.crypto.subtle.digest('SHA-256', event.target.result)
+                        .then(hashBuffer => {
+                            // 将 ArrayBuffer 转换为十六进制字符串
+                            const hashArray = Array.from(new Uint8Array(hashBuffer));
+                            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                            resolve(hashHex);
+                        })
+                        .catch(err => reject(err));
+                };
+
+                reader.onerror = (error) => {
+                    reject(error);
+                };
+
+                // 以 ArrayBuffer 格式读取文件
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
 
     </script>
 </body>

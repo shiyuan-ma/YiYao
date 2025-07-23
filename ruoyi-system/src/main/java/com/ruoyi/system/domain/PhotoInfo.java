@@ -60,6 +60,14 @@ public class PhotoInfo extends BaseEntity
     @Excel(name = "上传时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date uploadTime;
 
+    /** 文件SHA256哈希值 */
+    @Excel(name = "文件哈希值")
+    private String fileHash;
+
+    /** 缩略图URL */
+    @Excel(name = "缩略图URL")
+    private String thumbnailUrl;
+
     public void setId(Long id) 
     {
         this.id = id;
@@ -159,6 +167,24 @@ public class PhotoInfo extends BaseEntity
     {
         return uploadTime;
     }
+    public void setFileHash(String fileHash) 
+    {
+        this.fileHash = fileHash;
+    }
+
+    public String getFileHash() 
+    {
+        return fileHash;
+    }
+    public void setThumbnailUrl(String thumbnailUrl) 
+    {
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public String getThumbnailUrl() 
+    {
+        return thumbnailUrl;
+    }
 
     @Override
     public String toString() {
@@ -174,6 +200,8 @@ public class PhotoInfo extends BaseEntity
             .append("width", getWidth())
             .append("height", getHeight())
             .append("uploadTime", getUploadTime())
+            .append("fileHash", getFileHash())
+            .append("thumbnailUrl", getThumbnailUrl())
             .append("createBy", getCreateBy())
             .append("createTime", getCreateTime())
             .append("updateBy", getUpdateBy())

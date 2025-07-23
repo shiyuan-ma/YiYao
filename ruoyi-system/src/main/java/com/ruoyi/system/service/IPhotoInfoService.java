@@ -2,6 +2,7 @@ package com.ruoyi.system.service;
 
 import java.util.List;
 import com.ruoyi.system.domain.PhotoInfo;
+import com.ruoyi.system.domain.UploadResult;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -76,4 +77,38 @@ public interface IPhotoInfoService
      * @return 结果
      */
     public int batchUploadPhotos(List<MultipartFile> files, Long albumId);
+
+    /**
+     * 批量上传照片（带详细结果）
+     * 
+     * @param files 文件列表
+     * @param albumId 相册ID
+     * @return 上传结果
+     */
+    public UploadResult batchUploadPhotosWithResult(List<MultipartFile> files, Long albumId);
+
+    /**
+     * 检查文件是否重复
+     * 
+     * @param albumId 相册ID
+     * @param fileHash 文件哈希值
+     * @return 是否重复
+     */
+    public boolean checkDuplicateFile(Long albumId, String fileHash);
+
+    /**
+     * 根据相册ID查询所有文件哈希值
+     * 
+     * @param albumId 相册ID
+     * @return 哈希值列表
+     */
+    public List<String> getHashesByAlbumId(Long albumId);
+
+    /**
+     * 计算文件的SHA256哈希值
+     * 
+     * @param file 文件
+     * @return SHA256哈希值
+     */
+    public String calculateFileHash(MultipartFile file);
 }

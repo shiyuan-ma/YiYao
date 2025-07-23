@@ -17,6 +17,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.PhotoInfo;
+import com.ruoyi.system.domain.UploadResult;
 import com.ruoyi.system.service.IPhotoInfoService;
 import com.ruoyi.common.core.page.TableDataInfo;
 
@@ -58,6 +59,21 @@ public class PhotoUploadController extends BaseController
         return getDataTable(list);
     }
 
+
+    /**
+     * 查询相册里面的hash值
+     * @param albumId
+     * @return
+     */
+    @RequiresPermissions("album:upload:view")
+    @GetMapping("/hashes/{albumId}")
+    @ResponseBody
+    public AjaxResult getPhotosAllHashes(@PathVariable("albumId") Long albumId)
+    {
+        List<String> hashes = photoInfoService.getHashesByAlbumId(albumId);
+        return AjaxResult.success(hashes);
+    }
+
     /**
      * 根据相册ID查询照片列表
      */
@@ -97,11 +113,25 @@ public class PhotoUploadController extends BaseController
             return AjaxResult.error("相册ID格式错误");
         }
         
-        int successCount = photoInfoService.batchUploadPhotos(files, albumId);
+        // 调用批量上传服务，返回上传结果
+        UploadResult result = photoInfoService.batchUploadPhotosWithResult(files, albumId);
         
-        if (successCount > 0)
+        if (result.getSuccessCount() > 0)
         {
-            return AjaxResult.success("成功上传 " + successCount + " 张照片");
+            String message = "成功上传 " + result.getSuccessCount() + " 个文件";
+            if (result.getDuplicateCount() > 0)
+            {
+                message += "，跳过 " + result.getDuplicateCount() + " 个重复文件";
+            }
+            if (result.getFailedCount() > 0)
+            {
+                message += "，" + result.getFailedCount() + " 个文件上传失败";
+            }
+            return AjaxResult.success(message);
+        }
+        else if (result.getDuplicateCount() > 0)
+        {
+            return AjaxResult.error("所有文件都已存在，跳过 " + result.getDuplicateCount() + " 个重复文件");
         }
         else
         {

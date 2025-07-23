@@ -2,6 +2,7 @@ package com.ruoyi.system.mapper;
 
 import java.util.List;
 import com.ruoyi.system.domain.PhotoInfo;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 照片信息Mapper接口
@@ -74,4 +75,21 @@ public interface PhotoInfoMapper
      * @return 照片数量
      */
     public int countPhotoByAlbumId(Long albumId);
+
+    /**
+     * 检查文件是否重复
+     * 
+     * @param albumId 相册ID
+     * @param fileHash 文件哈希值
+     * @return 重复文件数量
+     */
+    public int checkDuplicateFile(@Param("albumId")Long albumId, @Param("fileHash")String fileHash);
+
+    /**
+     * 根据相册ID查询所有文件哈希值
+     * 
+     * @param albumId 相册ID
+     * @return 哈希值列表
+     */
+    public List<String> selectHashesByAlbumId(Long albumId);
 }

@@ -16,6 +16,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="width"    column="width"    />
         <result property="height"    column="height"    />
         <result property="uploadTime"    column="upload_time"    />
+        <result property="fileHash"    column="file_hash"    />
+        <result property="thumbnailUrl"    column="thumbnail_url"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
@@ -24,7 +26,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectPhotoInfoVo">
-        select id, album_id, photo_name, original_name, file_path, file_url, file_size, file_type, width, height, upload_time, create_by, create_time, update_by, update_time, remark from photo_info
+        select id, album_id, photo_name, original_name, file_path, file_url, file_size, file_type, width, height, upload_time, file_hash, thumbnail_url, create_by, create_time, update_by, update_time, remark from photo_info
     </sql>
 
     <select id="selectPhotoInfoList" parameterType="PhotoInfo" resultMap="PhotoInfoResult">
@@ -66,6 +68,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="width != null">width,</if>
             <if test="height != null">height,</if>
             <if test="uploadTime != null">upload_time,</if>
+            <if test="fileHash != null and fileHash != ''">file_hash,</if>
+            <if test="thumbnailUrl != null and thumbnailUrl != ''">thumbnail_url,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
@@ -83,6 +87,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="width != null">#{width},</if>
             <if test="height != null">#{height},</if>
             <if test="uploadTime != null">#{uploadTime},</if>
+            <if test="fileHash != null and fileHash != ''">#{fileHash},</if>
+            <if test="thumbnailUrl != null and thumbnailUrl != ''">#{thumbnailUrl},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
@@ -104,6 +110,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="width != null">width = #{width},</if>
             <if test="height != null">height = #{height},</if>
             <if test="uploadTime != null">upload_time = #{uploadTime},</if>
+            <if test="fileHash != null and fileHash != ''">file_hash = #{fileHash},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
@@ -123,5 +130,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
+    <!-- 检查文件是否重复 -->
+    <select id="checkDuplicateFile" resultType="int">
+        select count(*) from photo_info 
+        where album_id = #{albumId} and file_hash = #{fileHash}
+    </select>
+
+    <!-- 根据相册ID查询所有文件哈希值 -->
+    <select id="selectHashesByAlbumId" parameterType="Long" resultType="String">
+        select file_hash from photo_info 
+        where album_id = #{albumId} and file_hash is not null
+        order by upload_time desc
+    </select>
 
 </mapper>
