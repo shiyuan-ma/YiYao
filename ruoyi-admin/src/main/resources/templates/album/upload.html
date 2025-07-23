@@ -5,13 +5,11 @@
     <th:block th:include="include :: header('照片上传')" />
 
     <style>
-        /* --- 新增的懒加载优化样式 --- */
         .lazy-image-container {
             position: relative;
             width: 100%;
-            /* 保持16:9的比例，可以根据您的图片常见比例调整 */
             padding-top: 56.25%;
-            background-color: #f0f0f0; /* 优雅的灰色占位背景 */
+            background-color: #f0f0f0;
         }
 
         .lazy-image {
@@ -21,20 +19,12 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* 初始状态：完全模糊 */
             filter: blur(20px);
-            /* 加载完成后的过渡效果 */
             transition: filter 0.5s ease-in-out;
         }
 
         .lazy-image.loaded {
-            /* 加载完成：移除模糊 */
             filter: blur(0);
-        }
-
-        /* 视频不需要模糊效果，保持原样 */
-        .photo-item video {
-            background-color: #000;
         }
 
         .photo-gallery {
@@ -184,20 +174,25 @@
                         <!-- 拖拽上传区域 -->
                         <div class="upload-area" id="uploadArea" onclick="selectFiles()" style="cursor: pointer;">
                             <div class="upload-content">
-                                <i class="fa fa-cloud-upload" style="font-size: 48px; color: #ddd; margin-bottom: 15px;"></i>
+                                <i class="fa fa-cloud-upload"
+                                    style="font-size: 48px; color: #ddd; margin-bottom: 15px;"></i>
                                 <h4 style="color: #666; margin-bottom: 10px;">拖拽图片或视频到此处上传</h4>
                                 <p style="color: #999; margin-bottom: 20px;">或者点击此区域选择文件</p>
 
                                 <div style="margin-bottom: 15px;">
-                                    <input type="file" id="fileInput" multiple accept="image/*,video/*" style="display: none;">
-                                    <button type="button" class="btn btn-primary" onclick="event.stopPropagation(); selectFiles()">
+                                    <input type="file" id="fileInput" multiple accept="image/*,video/*"
+                                        style="display: none;">
+                                    <button type="button" class="btn btn-primary"
+                                        onclick="event.stopPropagation(); selectFiles()">
                                         <i class="fa fa-folder-open"></i> 选择文件
                                     </button>
-                                    <button type="button" class="btn btn-success" onclick="event.stopPropagation(); uploadFiles()" id="uploadBtn" disabled style="margin-left: 10px;">
+                                    <button type="button" class="btn btn-success"
+                                        onclick="event.stopPropagation(); uploadFiles()" id="uploadBtn" disabled
+                                        style="margin-left: 10px;">
                                         <i class="fa fa-upload"></i> 上传文件
                                     </button>
                                 </div>
-                                
+
                                 <div style="margin-bottom: 15px;">
                                     <label class="checkbox-inline" style="font-size: 13px; color: #666;">
                                         <input type="checkbox" id="autoUploadCheckbox" checked> 选择文件后自动上传
@@ -205,7 +200,7 @@
                                 </div>
 
                                 <div id="fileStatus" class="text-muted">
-                                    支持图片（JPG、PNG、GIF）和视频（MP4、AVI、MOV）格式，单个文件最大999MB，最多20个文件
+                                    支持图片（JPG、PNG、GIF）和视频（MP4、AVI、MOV）格式，单个文件最大999MB，最多10个文件
                                 </div>
                             </div>
                         </div>
@@ -254,11 +249,11 @@
             $('#fileInput').change(function () {
                 var files = this.files;
                 updateFileStatus(files);
-                
+
                 // 检查是否开启自动上传
                 if (document.getElementById('autoUploadCheckbox').checked && files.length > 0) {
                     // 延迟一点时间让用户看到文件选择的反馈
-                    setTimeout(function() {
+                    setTimeout(function () {
                         uploadFiles();
                     }, 500);
                 }
@@ -272,7 +267,6 @@
             console.log('Loading albums from:', ctx + 'album/list/all');
             $.get(ctx + 'album/list/all', function (result) {
                 console.log('Albums response:', result);
-                // 修复：若依框架成功状态码是0，不是200
                 if (result.code === 0 || result.code === 200) {
                     var select = $('#albumSelect');
                     select.empty().append('<option value="">选择相册</option>');
@@ -315,14 +309,14 @@
             var uploadBtn = document.getElementById('uploadBtn');
 
             if (files.length === 0) {
-                statusElement.textContent = '支持图片（JPG、PNG、GIF）和视频（MP4、AVI、MOV）格式，单个文件最大999MB，最多20个文件';
+                statusElement.textContent = '支持图片（JPG、PNG、GIF）和视频（MP4、AVI、MOV）格式，单个文件最大999MB，最多10个文件';
                 statusElement.className = 'text-muted';
                 uploadBtn.disabled = true;
                 return;
             }
 
-            if (files.length > 20) {
-                statusElement.textContent = '选择的文件过多，最多只能选择20个文件';
+            if (files.length > 5) {
+                statusElement.textContent = '选择的文件过多，最多只能选择5个文件';
                 statusElement.className = 'text-danger';
                 uploadBtn.disabled = true;
                 return;
@@ -365,11 +359,8 @@
             uploadBtn.disabled = validFiles === 0;
         }
 
-        // 上传文件函数
-        // 使用下面的版本完整替换您现有的 uploadFiles 函数
-
-        // 使函数变为 async 以便使用 await
-        async function uploadFiles() {
+        // 简化版上传函数 - 让后端处理重复检查，避免前端卡住
+        function uploadFiles() {
             console.log('=== 开始上传文件 ===');
             console.log('当前相册ID:', currentAlbumId);
 
@@ -388,116 +379,72 @@
             var uploadBtn = document.getElementById('uploadBtn');
             var statusElement = document.getElementById('fileStatus');
 
-            // 禁用按钮并更新状态为“验证中”
+            // 禁用按钮并更新状态
             uploadBtn.disabled = true;
-            uploadBtn.innerHTML = '<i class="fa fa-shield"></i> 验证文件中...';
-            statusElement.textContent = '正在检查重复文件，请稍候...';
+            uploadBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 上传中...';
+            statusElement.textContent = '正在上传文件，请稍候...';
             statusElement.className = 'text-info';
 
-            try {
-                // 1. 从后端获取当前相册已存在的哈希列表
-                const response = await $.get(ctx + 'album/upload/hashes/' + currentAlbumId);
-                if (response.code !== 0 && response.code !== 200) {
-                    throw new Error('获取文件哈希列表失败: ' + response.msg);
+            // 构建 FormData
+            var formData = new FormData();
+            formData.append('albumId', currentAlbumId);
+
+            // 只添加图片和视频文件
+            var validFileCount = 0;
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                    formData.append('files', file);
+                    validFileCount++;
                 }
-                const existingHashes = new Set(response.data || []);
-                console.log(`获取到 ${existingHashes.size} 个已存在的哈希值。`);
+            }
 
-                // 2. 遍历选中的文件，计算哈希并进行过滤
-                const filesToUpload = [];
-                const duplicateFiles = [];
-                const localHashes = new Set(); // 用于检查本次选择内的重复
-
-                for (const file of files) {
-                    // 只处理图片和视频
-                    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
-                        continue;
-                    }
-
-                    statusElement.textContent = `正在验证: ${file.name}`;
-                    const hash = await calculateFileHash(file);
-                    console.log(`文件: ${file.name}, 哈希: ${hash.substring(0, 10)}...`);
-
-                    // 检查哈希是否已存在 (在服务器上或在本次选择中)
-                    if (existingHashes.has(hash) || localHashes.has(hash)) {
-                        duplicateFiles.push(file.name);
-                    } else {
-                        filesToUpload.push({ file: file, hash: hash });
-                        localHashes.add(hash);
-                    }
-                }
-
-                // 3. 处理验证结果
-                if (filesToUpload.length === 0) {
-                    const message = files.length === duplicateFiles.length
-                        ? `所有 ${files.length} 个文件都已存在于相册中，无需上传。`
-                        : '没有有效的、不重复的文件可供上传。';
-                    $.modal.msgWarning(message);
-                    statusElement.textContent = message;
-                    statusElement.className = 'text-warning';
-                    // 清空文件选择
-                    fileInput.value = '';
-                    // 恢复按钮状态
-                    uploadBtn.disabled = false;
-                    uploadBtn.innerHTML = '<i class="fa fa-upload"></i> 上传文件';
-                    return;
-                }
-
-                // 4. 构建 FormData 并上传
-                var formData = new FormData();
-                formData.append('albumId', currentAlbumId);
-                filesToUpload.forEach(item => {
-                    formData.append('files', item.file);
-                    // 可以在这里将哈希也传给后端，虽然后端也会自己算，但可以用于日志等
-                    // formData.append('hashes', item.hash);
-                });
-
-                const uploadCount = filesToUpload.length;
-                let statusMsg = `共 ${uploadCount} 个新文件准备上传。`;
-                if (duplicateFiles.length > 0) {
-                    statusMsg += ` 已自动跳过 ${duplicateFiles.length} 个重复文件。`;
-                }
-                statusElement.textContent = statusMsg;
-                uploadBtn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> 上传中 (${uploadCount})...`;
-
-                // 5. 发送 Ajax 请求
-                $.ajax({
-                    url: ctx + 'album/upload/batch',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (result) {
-                        if (result.code === 0 || result.code === 200) {
-                            $.modal.msgSuccess(result.msg);
-                            if (currentAlbumId) {
-                                loadPhotos(currentAlbumId);
-                            }
-                            fileInput.value = '';
-                            updateFileStatus([]);
-                        } else {
-                            $.modal.msgError(result.msg || '上传失败');
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        $.modal.msgError('上传失败：' + error + ' (状态码: ' + xhr.status + ')');
-                    },
-                    complete: function () {
-                        uploadBtn.disabled = false;
-                        uploadBtn.innerHTML = '<i class="fa fa-upload"></i> 上传文件';
-                    }
-                });
-
-            } catch (error) {
-                console.error('文件验证或上传过程中发生错误:', error);
-                $.modal.msgError(error.message || '操作失败，请检查网络或联系管理员。');
-                statusElement.textContent = '验证失败，请重试。';
-                statusElement.className = 'text-danger';
+            if (validFileCount === 0) {
+                $.modal.msgWarning('没有有效的图片或视频文件');
                 uploadBtn.disabled = false;
                 uploadBtn.innerHTML = '<i class="fa fa-upload"></i> 上传文件';
+                statusElement.textContent = '支持图片（JPG、PNG、GIF）和视频（MP4、AVI、MOV）格式，单个文件最大999MB，最多10个文件';
+                statusElement.className = 'text-muted';
+                return;
             }
-        }
 
+            statusElement.textContent = `正在上传 ${validFileCount} 个文件...`;
+
+            // 发送 Ajax 请求
+            $.ajax({
+                url: ctx + 'album/upload/batch',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                timeout: 300000, // 5分钟超时
+                success: function (result) {
+                    if (result.code === 0 || result.code === 200) {
+                        $.modal.msgSuccess(result.msg);
+                        if (currentAlbumId) {
+                            loadPhotos(currentAlbumId);
+                        }
+                        fileInput.value = '';
+                        updateFileStatus([]);
+                    } else {
+                        $.modal.msgError(result.msg || '上传失败');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    if (status === 'timeout') {
+                        $.modal.msgError('上传超时，请检查网络连接或文件大小');
+                    } else {
+                        $.modal.msgError('上传失败：' + error + ' (状态码: ' + xhr.status + ')');
+                    }
+                },
+                complete: function () {
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerHTML = '<i class="fa fa-upload"></i> 上传文件';
+                    statusElement.textContent = '支持图片（JPG、PNG、GIF）和视频（MP4、AVI、MOV）格式，单个文件最大999MB，最多10个文件';
+                    statusElement.className = 'text-muted';
+                }
+            });
+        }
 
         function loadPhotos(albumId) {
             $.get(ctx + 'album/upload/album/' + albumId, function (result) {
@@ -506,8 +453,6 @@
                 }
             });
         }
-
-        // 找到 displayPhotos 函数，用下面的代码完全替换它
 
         function displayPhotos(photos) {
             var gallery = $('#photoGallery');
@@ -519,7 +464,6 @@
             }
 
             $.each(photos, function (index, photo) {
-                // 调试信息：打印缩略图URL
                 console.log('Photo:', photo.photoName, 'Original URL:', photo.fileUrl, 'Thumbnail URL:', photo.thumbnailUrl);
                 var deleteButton = removePermission ?
                     '<button class="btn btn-danger btn-xs" onclick="deletePhoto(' + photo.id + ')" title="删除文件"><i class="fa fa-trash"></i></button>' :
@@ -530,7 +474,6 @@
                 var clickHandler = '';
 
                 if (isVideo) {
-                    // 视频不需要懒加载优化，保持原样即可
                     mediaHtml = `
                 <video src="${photo.fileUrl}" style="cursor: pointer;" muted preload="metadata">
                     您的浏览器不支持视频播放
@@ -542,11 +485,7 @@
             `;
                     clickHandler = `onclick="previewVideo('${photo.fileUrl}', '${photo.photoName || photo.originalName}')"`;
                 } else {
-                    // ⭐⭐⭐ 图片懒加载优化 - 使用缩略图显示，点击查看原图 ⭐⭐⭐
-                    // 优先使用缩略图URL，如果没有缩略图则使用原图
                     var displayUrl = photo.thumbnailUrl || photo.fileUrl;
-                    // 真实图片URL存放在 data-src 中
-                    // src 使用一个1x1的透明gif作为占位符，防止显示破图图标
                     mediaHtml = `
                 <div class="lazy-image-container">
                     <img class="lazy-image"
@@ -556,7 +495,6 @@
                          style="cursor: pointer;">
                 </div>
             `;
-                    // 点击时预览原图，而不是缩略图
                     clickHandler = `onclick="previewImage('${photo.fileUrl}', '${photo.photoName || photo.originalName}')"`;
                 }
 
@@ -577,16 +515,12 @@
                 gallery.append(photoHtml);
             });
 
-            // ⭐ 所有图片DOM都创建完毕后，初始化懒加载
             initLazyLoading();
         }
 
-        // ⭐⭐⭐ 全新的懒加载初始化函数 ⭐⭐⭐
         function initLazyLoading() {
-            // 选取所有需要懒加载的图片
             const lazyImages = document.querySelectorAll('.lazy-image');
 
-            // 如果浏览器不支持 IntersectionObserver，则直接加载所有图片
             if (!('IntersectionObserver' in window)) {
                 lazyImages.forEach(img => {
                     img.src = img.dataset.src;
@@ -595,35 +529,23 @@
                 return;
             }
 
-            // 创建一个观察者
             const observer = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
-                    // 如果图片进入了可视区域
                     if (entry.isIntersecting) {
                         const img = entry.target;
-
-                        // 将真实的URL赋给src，开始加载图片
                         img.src = img.dataset.src;
-
-                        // 图片加载完成后，添加 'loaded' 类来触发CSS过渡效果
                         img.onload = () => {
                             img.classList.add('loaded');
                         };
-
-                        // 已经加载过的图片，不再需要观察
                         observer.unobserve(img);
                     }
                 });
-            }, {
-                // rootMargin: '50px' // 可以预加载距离视口还有50px的图片
             });
 
-            // 让观察者开始观察每一张懒加载图片
             lazyImages.forEach(img => {
                 observer.observe(img);
             });
         }
-
 
         function deletePhoto(photoId) {
             $.modal.confirm('确定要删除这张照片吗？', function () {
@@ -645,15 +567,14 @@
         }
 
         function previewImage(url, name) {
-            // 创建模态框HTML
             var modalHtml = `
                 <div class="modal fade" id="imagePreviewModal" tabindex="-1" role="dialog">
                     <div class="modal-dialog modal-lg" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
+                    <span aria-hidden="true">&times;</span>
+                </button>
                                 <h4 class="modal-title">${name}</h4>
                             </div>
                             <div class="modal-body text-center">
@@ -669,10 +590,7 @@
                 </div>
             `;
 
-            // 移除已存在的模态框
             $('#imagePreviewModal').remove();
-
-            // 添加新的模态框并显示
             $('body').append(modalHtml);
             $('#imagePreviewModal').modal('show');
         }
@@ -685,7 +603,6 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // 判断是否为视频文件
         function isVideoFile(filename) {
             if (!filename) return false;
             var videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v'];
@@ -693,17 +610,15 @@
             return videoExtensions.includes(ext);
         }
 
-        // 视频预览函数
         function previewVideo(url, name) {
-            // 创建视频预览模态框HTML
             var modalHtml = `
                 <div class="modal fade" id="videoPreviewModal" tabindex="-1" role="dialog">
                     <div class="modal-dialog modal-lg" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
+                    <span aria-hidden="true">&times;</span>
+                </button>
                                 <h4 class="modal-title">${name}</h4>
                             </div>
                             <div class="modal-body text-center">
@@ -724,26 +639,20 @@
                 </div>
             `;
 
-            // 移除已存在的模态框
             $('#videoPreviewModal').remove();
-
-            // 添加新的模态框并显示
             $('body').append(modalHtml);
             $('#videoPreviewModal').modal('show');
         }
 
-        // 初始化拖拽上传功能
         function initDragUpload() {
             var uploadArea = document.getElementById('uploadArea');
             var fileInput = document.getElementById('fileInput');
 
-            // 阻止默认的拖拽行为
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                 uploadArea.addEventListener(eventName, preventDefaults, false);
                 document.body.addEventListener(eventName, preventDefaults, false);
             });
 
-            // 高亮拖拽区域
             ['dragenter', 'dragover'].forEach(eventName => {
                 uploadArea.addEventListener(eventName, highlight, false);
             });
@@ -752,7 +661,6 @@
                 uploadArea.addEventListener(eventName, unhighlight, false);
             });
 
-            // 处理文件拖拽
             uploadArea.addEventListener('drop', handleDrop, false);
 
             function preventDefaults(e) {
@@ -772,85 +680,16 @@
                 var dt = e.dataTransfer;
                 var files = dt.files;
 
-                // 将拖拽的文件设置到文件输入框
                 fileInput.files = files;
-
-                // 更新文件状态显示
                 updateFileStatus(files);
-                
-                // 检查是否开启自动上传
+
                 if (document.getElementById('autoUploadCheckbox').checked && files.length > 0) {
-                    // 延迟一点时间让用户看到文件选择的反馈
-                    setTimeout(function() {
+                    setTimeout(function () {
                         uploadFiles();
                     }, 500);
                 }
             }
         }
-
-        // 处理拖拽文件的函数
-        function handleDragFiles(files) {
-            // 创建一个新的FileList对象（模拟）
-            var fileInput = document.getElementById('fileInput');
-
-            // 由于FileList是只读的，我们需要创建一个新的input元素
-            var newInput = document.createElement('input');
-            newInput.type = 'file';
-            newInput.multiple = true;
-            newInput.accept = 'image/*,video/*';
-            newInput.style.display = 'none';
-
-            // 创建DataTransfer对象来设置files
-            var dt = new DataTransfer();
-            for (var i = 0; i < files.length; i++) {
-                dt.items.add(files[i]);
-            }
-
-            newInput.files = dt.files;
-
-            // 替换原来的input
-            fileInput.parentNode.replaceChild(newInput, fileInput);
-            newInput.id = 'fileInput';
-
-            // 添加change事件监听器
-            newInput.addEventListener('change', function () {
-                updateFileStatus(this.files);
-            });
-
-            // 更新文件状态
-            updateFileStatus(files);
-        }
-
-        /**
-         * 使用浏览器的 Crypto API 异步计算文件的 SHA-256 哈希值
-         * @param {File} file - 要计算哈希值的文件对象
-         * @returns {Promise<string>} - 一个解析为64位十六进制哈希字符串的 Promise
-         */
-        function calculateFileHash(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-
-                reader.onload = (event) => {
-                    // 文件读取完成，开始计算哈希
-                    window.crypto.subtle.digest('SHA-256', event.target.result)
-                        .then(hashBuffer => {
-                            // 将 ArrayBuffer 转换为十六进制字符串
-                            const hashArray = Array.from(new Uint8Array(hashBuffer));
-                            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                            resolve(hashHex);
-                        })
-                        .catch(err => reject(err));
-                };
-
-                reader.onerror = (error) => {
-                    reject(error);
-                };
-
-                // 以 ArrayBuffer 格式读取文件
-                reader.readAsArrayBuffer(file);
-            });
-        }
-
 
     </script>
 </body>

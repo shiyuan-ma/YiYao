@@ -32,9 +32,11 @@ server:
       min-spare: 100
     # 文件上传相关配置
     max-http-form-post-size: 10737418240
-    # 最大文件数量限制
-    max-parameter-count: 10000
- 
+    # 最大参数数量限制 (关键！-1表示不限制)
+    max-parameter-count: -1
+    # 最大文件上传数量限制 (关键！-1表示不限制)
+    max-file-count: -1
+
 # 日志配置
 logging:
   level:
@@ -49,6 +51,11 @@ user:
 
 # Spring配置
 spring:
+  # 其他spring配置...
+  mvc:
+    pathmatch:
+      # 将路径匹配策略设置回 ant_path_matcher 以兼容 Swagger
+      matching-strategy: ant_path_matcher
   # 模板引擎
   thymeleaf:
     mode: HTML
@@ -64,13 +71,19 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
   profiles:
     active: druid
-  # 文件上传
+  # 文件上传 (关键！必须生效！注意此处的缩进！)
   servlet:
     multipart:
       # 单个文件大小
       max-file-size: 999MB
-      # 设置总上传的文件大小
+      # 总上传数据大小
       max-request-size: 10240MB
+      # 是否启用multipart上传
+      enabled: true
+      # 文件写入磁盘的阈值
+      file-size-threshold: 2KB
+      # 上传文件的临时目录
+      location: ${java.io.tmpdir}
   # 服务模块
   devtools:
     restart:
@@ -114,7 +127,7 @@ shiro:
     httpOnly: true
     # 设置Cookie的过期时间，天为单位
     maxAge: 30
-    # 设置密钥，务必保持唯一性（生成方式，直接拷贝到main运行即可）Base64.encodeToString(CipherUtils.generateNewKey(128, "AES").getEncoded()) （默认启动生成随机秘钥，随机秘钥会导致之前客户端RememberMe Cookie无效，如设置固定秘钥RememberMe Cookie则有效）
+    # 设置密钥，务必保持唯一性
     cipherKey:
   session:
     # Session超时时间，-1代表永不过期（默认30分钟）
@@ -123,7 +136,7 @@ shiro:
     dbSyncPeriod: 1
     # 相隔多久检查一次session的有效性，默认就是10分钟
     validationInterval: 10
-    # 同一个用户最大会话数，比如2的意思是同一个账号允许最多同时两个人登录（默认-1不限制）
+    # 同一个用户最大会话数，-1不限制
     maxSession: -1
     # 踢出之前登录的/之后登录的用户，默认踢出之前登录的用户
     kickoutAfter: false
@@ -135,7 +148,7 @@ shiro:
 xss:
   # 过滤开关
   enabled: true
-  # 排除链接（多个用逗号分隔）
+  # 排除链接
   excludes: /system/notice/*
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
@@ -144,7 +157,7 @@ xss:
 csrf:
   # 过滤开关
   enabled: false
-  # 白名单（多个用逗号分隔）
+  # 白名单
   whites: /druid
 
 # Swagger配置

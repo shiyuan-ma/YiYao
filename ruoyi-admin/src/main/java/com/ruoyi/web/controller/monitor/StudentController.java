@@ -1,6 +1,5 @@
 package com.ruoyi.web.controller.monitor;
 
-import com.mysql.cj.util.StringUtils;
 import com.ruoyi.common.annotation.DataSource;
 import com.ruoyi.system.domain.Comment;
 import com.ruoyi.system.domain.Daylog;
