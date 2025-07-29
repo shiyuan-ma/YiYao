@@ -1,6 +1,8 @@
 package com.ruoyi.web.controller.album;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -116,6 +118,13 @@ public class PhotoUploadController extends BaseController
         // 调用批量上传服务，返回上传结果
         UploadResult result = photoInfoService.batchUploadPhotosWithResult(files, albumId);
         
+        // 构建详细的响应数据
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("successCount", result.getSuccessCount());
+        responseData.put("duplicateCount", result.getDuplicateCount());
+        responseData.put("failedCount", result.getFailedCount());
+        responseData.put("totalCount", result.getTotalCount());
+        
         if (result.getSuccessCount() > 0)
         {
             String message = "成功上传 " + result.getSuccessCount() + " 个文件";
@@ -127,15 +136,20 @@ public class PhotoUploadController extends BaseController
             {
                 message += "，" + result.getFailedCount() + " 个文件上传失败";
             }
-            return AjaxResult.success(message);
+            responseData.put("message", message);
+            return AjaxResult.success(message, responseData);
         }
         else if (result.getDuplicateCount() > 0)
         {
-            return AjaxResult.error("所有文件都已存在，跳过 " + result.getDuplicateCount() + " 个重复文件");
+            String message = "所有文件都已存在，跳过 " + result.getDuplicateCount() + " 个重复文件";
+            responseData.put("message", message);
+            return AjaxResult.error(message, responseData);
         }
         else
         {
-            return AjaxResult.error("上传失败");
+            String message = "上传失败";
+            responseData.put("message", message);
+            return AjaxResult.error(message, responseData);
         }
     }
 

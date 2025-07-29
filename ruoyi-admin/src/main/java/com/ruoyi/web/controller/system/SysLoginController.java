@@ -56,7 +56,16 @@ public class SysLoginController extends BaseController
     @ResponseBody
     public AjaxResult ajaxLogin(String username, String password, Boolean rememberMe)
     {
-        UsernamePasswordToken token = new UsernamePasswordToken(username, password, rememberMe);
+        // 添加调试信息
+        System.out.println("登录请求 - 用户名: " + username + ", 密码: " + (password != null ? "***" : "null") + ", 记住我: " + rememberMe);
+        
+        if (username == null || password == null) {
+            return error("用户名或密码不能为空");
+        }
+        
+        // 处理rememberMe为null的情况
+        boolean remember = rememberMe != null ? rememberMe : false;
+        UsernamePasswordToken token = new UsernamePasswordToken(username, password, remember);
         Subject subject = SecurityUtils.getSubject();
         try
         {
@@ -70,6 +79,7 @@ public class SysLoginController extends BaseController
             {
                 msg = e.getMessage();
             }
+            System.out.println("登录失败: " + msg + ", 异常: " + e.getClass().getSimpleName());
             return error(msg);
         }
     }
