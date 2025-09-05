@@ -95,7 +95,14 @@ public class StudentLogServiceImpl implements IStudentLogService {
         Comment.setContent(contentHtml.toString());
         Comment.setIp(ip);
         Comment.setIsStaff(0);
-        Comment.setPostTime(new Date());
+
+        Random random = new Random();
+        // 生成0到30分钟内的随机毫秒数 (30 * 60 * 1000 = 1,800,000)
+        long randomMillis = random.nextInt(20 * 60 * 1000);
+        Date now = new Date();
+        Date randomPostTime = new Date(now.getTime() + randomMillis);
+        Comment.setPostTime(randomPostTime); // 将新生成的随机时间设置到对象中
+
         Comment.setQuoteIdGroup(",");
         Comment.setQuoteUpdateId(",");
         Comment.setStatus(20L);
