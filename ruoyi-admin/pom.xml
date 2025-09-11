@@ -88,6 +88,13 @@
             <artifactId>ruoyi-generator</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.cz88</groupId>
+            <artifactId>czdb-search</artifactId>
+            <version>1.0.2.10</version>
+            <type>pom</type>
+        </dependency>
+
     </dependencies>
 
     <build>

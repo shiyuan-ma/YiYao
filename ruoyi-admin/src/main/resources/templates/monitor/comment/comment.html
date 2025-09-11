@@ -19,7 +19,7 @@
                             <input type="text" class="time-input" placeholder="请选择时间" name="postTime"/>
                         </li>
                         <li>
-                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="searchWithScroll()"><i class="fa fa-search"></i>&nbsp;搜索</a>
                             <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                         </li>
                     </ul>
@@ -52,6 +52,18 @@
     var removeFlag = [[${@permission.hasPermi('monitor:comment:remove')}]];
     var prefix = ctx + "monitor/comment"; // URL前缀，要和Controller的@RequestMapping一致
 
+    // 重写搜索方法，添加回到顶部功能和重置页码
+    function searchWithScroll() {
+        // 重置到第一页
+        $("#bootstrap-table").bootstrapTable('selectPage', 1);
+        // 执行搜索
+        $.table.search();
+        // 查询时回到顶部
+        $('html, body').animate({
+            scrollTop: 0
+        }, 300);
+    }
+
     $(function() {
         var options = {
             url: prefix + "/list", // 获取数据的URL
@@ -67,6 +79,10 @@
                     field: 'id',
                     title: '日志ID',
                     visible: false
+                },
+                {
+                    field: 'userName',
+                    title: '用户名'
                 },
                 {
                     field: 'content',
@@ -85,20 +101,26 @@
                     }
                 },
                 {
-                    field: 'userName',
-                    title: '用户名'
-                },
-                {
                     field: 'ip',
                     title: 'IP信息'
                 },
                 {
-                    field: 'topicId',
-                    title: '帖子ID'
-                },
-                {
                     field: 'readUsers',
-                    title: '阅读人'
+                    title: '阅读人',
+                    formatter: function(value, row, index) {
+                        if (!value) return '';
+                        // 将阅读人按逗号分割，每两个一组显示
+                        var readers = value.split(',');
+                        var result = '';
+                        for (var i = 0; i < readers.length; i += 2) {
+                            var line = readers[i];
+                            if (i + 1 < readers.length) {
+                                line += ', ' + readers[i + 1];
+                            }
+                            result += line + '<br>';
+                        }
+                        return result;
+                    }
                 },
                 {
                     field: 'postTime',
@@ -116,6 +138,22 @@
                 }]
         };
         $.table.init(options);
+        
+        // 监听表格的分页事件
+        $('#bootstrap-table').on('page-change.bs.table', function(number, size) {
+            // 分页时回到顶部
+            $('html, body').animate({
+                scrollTop: 0
+            }, 300);
+        });
+        
+        // 监听表格的刷新事件（查询时触发）
+        $('#bootstrap-table').on('refresh.bs.table', function(params) {
+            // 刷新时回到顶部
+            $('html, body').animate({
+                scrollTop: 0
+            }, 300);
+        });
     });
 </script>
 </body>

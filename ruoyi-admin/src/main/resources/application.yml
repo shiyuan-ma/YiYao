@@ -11,7 +11,7 @@ ruoyi:
   # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/ruoyi/uploadPath）
   profile: logs/upload
   # 获取ip地址开关
-  addressEnabled: false
+  addressEnabled: true
 
 # 开发环境配置
 server:
@@ -158,7 +158,7 @@ csrf:
   # 过滤开关
   enabled: false
   # 白名单
-  whites: /druid
+  whites: /druid,/api/external/*
 
 # Swagger配置
 swagger:

@@ -237,7 +237,7 @@
             </button>
             <nav class="page-tabs menuTabs">
                 <div class="page-tabs-content">
-                    <a href="javascript:;" class="menuTab" th:data-id="@{/system/main}">首页</a>
+                    <a href="javascript:;" class="menuTab" th:data-id="@{/system/daylog}">日报管理</a>
                 </div>
             </nav>
             <button class="roll-nav roll-right tabRight">
@@ -249,8 +249,8 @@
         <a id="ax_close_max" class="ax_close_max" href="javascript:;" title="关闭全屏"> <i class="fa fa-times-circle-o"></i> </a>
 
         <div class="row mainContent" id="content-main" th:classappend="${mainClass}">
-            <iframe class="RuoYi_iframe" name="iframe0" width="100%" height="100%" th:data-id="@{/system/main}"
-                th:src="@{/system/main}" frameborder="0" seamless></iframe>
+            <iframe class="RuoYi_iframe" name="iframe0" width="100%" height="100%" th:data-id="@{/system/daylog}"
+                th:src="@{/system/daylog}" frameborder="0" seamless></iframe>
         </div>
 
         <div th:if="${footer}" class="footer">
@@ -332,7 +332,7 @@ function applyPath(url) {
 
 // 默认激活页签
 function tabActive() {
-    $('.menuTab[data-id="' + ctx + 'system/main"]').addClass('active');
+    $('.menuTab[data-id="' + ctx + 'system/daylog"]').addClass('active');
 }
 
 $(function() {

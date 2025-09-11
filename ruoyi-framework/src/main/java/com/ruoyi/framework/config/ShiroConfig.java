@@ -314,6 +314,8 @@ public class ShiroConfig
         filterChainDefinitionMap.put("/js/**", "anon");
         filterChainDefinitionMap.put("/ruoyi/**", "anon");
         filterChainDefinitionMap.put("/captcha/captchaImage**", "anon");
+        // 外部接口设置匿名访问
+        filterChainDefinitionMap.put("/api/external/**", "anon");
         // 匿名访问不鉴权注解列表
         List<String> permitAllUrl = SpringUtils.getBean(PermitAllUrlProperties.class).getUrls();
         if (StringUtils.isNotEmpty(permitAllUrl))

@@ -7,6 +7,11 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.czdb.DbSearcher;
+import com.ruoyi.common.utils.czdb.IpSearcher;
+import com.ruoyi.common.utils.czdb.QueryType;
+import com.ruoyi.common.utils.czdb.exception.IpFormatException;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.Comment; // 假设您的Comment实体在system模块
 import com.ruoyi.system.enumn.AccountEnum;
@@ -17,6 +22,12 @@ import org.springframework.stereotype.Controller; // 1. 【关键修改】@Contr
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import static com.ruoyi.common.enums.DataSourceType.SLAVE;
 
@@ -34,6 +45,8 @@ public class CommentController extends BaseController {
 
     @Autowired
     private ICommentService commentService;
+    @Autowired
+    private IpSearcher ipSearcher;
 
     // 5. 【新增方法】返回主页面
     @RequiresPermissions("monitor:comment:view")
@@ -54,6 +67,9 @@ public class CommentController extends BaseController {
             String userId = comment1.getUserName(); // 你调用的方法
             String remark = AccountEnum.getRemarkById(userId);
             comment1.setUserName(remark); // 直接修改对象属性，而不是把对象放入新List
+
+            String newFormat = ipSearcher.searchIpAddress(comment1.getIp());
+            comment1.setIp(newFormat);
         }
         // 您原来的转换逻辑可以保留
         return getDataTable(list);
@@ -147,5 +163,23 @@ public class CommentController extends BaseController {
         Long[] commentIds = Convert.toLongArray(ids);
         // 4. 调用 Service 层，传递转换后的 Long[] 数组
         return toAjax(commentService.deleteCommentByIds(commentIds));
+    }
+
+    public static void main(String[] args) {
+        DbSearcher searcher = null;
+        try {
+            searcher = new DbSearcher("ruoyi-admin/src/main/resources/offlineIP/cz88_public_v4.czdb", QueryType.MEMORY, "dWWs6VJ3wQlWLT18SCfBFw==");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            String IpAddressInfo = searcher.search("114.254.1.228");
+            String newFormat = IpAddressInfo.replaceAll("\\s+", "-");
+            System.out.println(newFormat);
+        } catch (IpFormatException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
