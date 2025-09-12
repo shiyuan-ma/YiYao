@@ -28,8 +28,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by time asc
     </select>
 
-    <select id="selectDaylogAll" resultMap="DaylogResult">
+    <select id="selectDaylogAllExceptArchived" resultMap="DaylogResult">
         <include refid="selectDaylogVo"/>
+        where archived = 0
         order by time desc
     </select>
     

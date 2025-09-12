@@ -45,9 +45,9 @@ public class DaylogServiceImpl implements IDaylogService
     }
 
     @Override
-    public List<Daylog> selectDaylogAll()
+    public List<Daylog> selectDaylogAllExceptArchived()
     {
-        return daylogMapper.selectDaylogAll();
+        return daylogMapper.selectDaylogAllExceptArchived();
     }
 
 

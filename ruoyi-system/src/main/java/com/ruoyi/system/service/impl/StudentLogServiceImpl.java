@@ -35,7 +35,7 @@ public class StudentLogServiceImpl implements IStudentLogService {
 
     @Override
     public int addComment(String userId) {
-        List<Daylog> daylogs = daylogService.selectDaylogAll(); // 获取所有日志
+        List<Daylog> daylogs = daylogService.selectDaylogAllExceptArchived(); // 获取所有日志
         int syr = 0;
 
         for (Daylog daylog : daylogs) {

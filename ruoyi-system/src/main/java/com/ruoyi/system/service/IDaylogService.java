@@ -22,7 +22,7 @@ public interface IDaylogService
     public Daylog selectDaylogById(Long id);
 
 
-    public List<Daylog> selectDaylogAll();
+    public List<Daylog> selectDaylogAllExceptArchived();
 
     /**
      * 查询【日报管理】列表

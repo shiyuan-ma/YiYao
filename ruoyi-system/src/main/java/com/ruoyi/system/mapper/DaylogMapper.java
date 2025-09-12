@@ -30,7 +30,7 @@ public interface DaylogMapper
     public List<Daylog> selectDaylogList(Daylog daylog);
 
 
-    public List<Daylog> selectDaylogAll();
+    public List<Daylog> selectDaylogAllExceptArchived();
 
     /**
      * 新增【日报管理】
