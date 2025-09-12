@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn compile:*)",
+      "Bash(mvn:*)",
+      "Bash(java:*)",
+      "Bash(dir \"D:\\java\\msyproject\\RuoYi\\ruoyi-admin\\target\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

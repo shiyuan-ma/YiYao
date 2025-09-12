@@ -1,0 +1,330 @@
+/* 星空风格登录页面样式 */
+html {
+    height: 100%;
+    overflow: hidden;
+}
+
+body.signin {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background: #000;
+    overflow: hidden;
+    position: relative;
+}
+
+/* 星空背景 */
+body.signin::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+    z-index: -2;
+}
+
+/* 星星效果 */
+.stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 4s infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+/* 流星效果 */
+.meteor {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+    animation: meteor 3s linear infinite;
+    opacity: 0;
+}
+
+@keyframes meteor {
+    0% {
+        opacity: 1;
+        transform: translateY(0) translateX(0) rotate(45deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(300px) translateX(300px) rotate(45deg);
+    }
+}
+
+.signinpanel {
+    width: 800px;
+    margin: 5% auto 0;
+    color: rgba(255, 255, 255, 0.95);
+    position: relative;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 40px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.signinpanel .logopanel {
+    float: none;
+    width: auto;
+    padding: 0;
+    background: none;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.signinpanel .logopanel h1 {
+    font-size: 48px;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    margin: 0;
+    font-weight: 300;
+    letter-spacing: 3px;
+}
+
+.signinpanel .logopanel h1 img {
+    display: none;
+}
+
+.signinpanel .signin-info {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.signinpanel .signin-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.signinpanel .signin-info ul li {
+    padding: 5px 0;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.signinpanel .signin-info ul li i {
+    color: #64b5f6;
+    margin-right: 10px;
+}
+
+.signinpanel .form-control {
+    display: block;
+    margin-top: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-radius: 5px;
+    padding: 12px 15px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.signinpanel .form-control:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #64b5f6;
+    box-shadow: 0 0 10px rgba(100, 181, 246, 0.3);
+    outline: none;
+}
+
+.signinpanel .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.signinpanel .uname {
+    background: rgba(255, 255, 255, 0.1) url(../img/user.png) no-repeat 15px center;
+    padding-left: 45px;
+}
+
+.signinpanel .pword {
+    background: rgba(255, 255, 255, 0.1) url(../img/locked.png) no-repeat 15px center;
+    padding-left: 45px;
+}
+
+.signinpanel .code {
+    background: rgba(255, 255, 255, 0.1);
+    padding-left: 15px;
+}
+
+.signinpanel .btn {
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 18px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    background: linear-gradient(45deg, #1e88e5, #42a5f5);
+    border: none;
+    border-radius: 5px;
+    color: white;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.signinpanel .btn:hover {
+    background: linear-gradient(45deg, #1976d2, #1e88e5);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(30, 136, 229, 0.4);
+}
+
+.signinpanel form {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 40px;
+    backdrop-filter: blur(5px);
+}
+
+.signup-footer {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+.signup-footer a {
+    color: #64b5f6;
+    text-decoration: none;
+}
+
+.signup-footer a:hover {
+    color: #90caf9;
+    text-decoration: underline;
+}
+
+/* 复选框样式 */
+.checkbox-custom {
+    position: relative;
+    padding: 0 15px 0 25px;
+    margin: 15px 0;
+    display: inline-block;
+}
+
+.checkbox-custom input[type="checkbox"] {
+    opacity: 0;
+    position: absolute;
+    cursor: pointer;
+    z-index: 2;
+    margin: 0;
+    top: 3px;
+    left: 3px;
+}
+
+.checkbox-custom label:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.checkbox-custom input[type="checkbox"]:checked + label:after {
+    position: absolute;
+    display: inline-block;
+    font-family: 'FontAwesome';
+    content: "\f00c";
+    top: 2px;
+    left: 3px;
+    font-size: 12px;
+    line-height: 1;
+    width: 16px;
+    height: 16px;
+    color: #64b5f6;
+}
+
+.checkbox-custom label {
+    cursor: pointer;
+    line-height: 1.2;
+    font-weight: normal;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 768px) {
+    .signinpanel, .signuppanel {
+        margin: 0 auto;
+        width: 90% !important;
+        padding: 20px;
+    }
+    
+    .signinpanel form {
+        margin-top: 20px;
+        padding: 20px;
+    }
+    
+    .signinpanel .logopanel h1 {
+        font-size: 36px;
+    }
+}
+
+@media screen and (max-width: 320px) {
+    .signinpanel, .signuppanel {
+        margin: 0 10px;
+        width: auto;
+        padding: 15px;
+    }
+}
+
+/* 验证码图片样式 */
+.imgcode {
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.imgcode:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(100, 181, 246, 0.5);
+}
+
+/* IP地址信息样式 */
+.ip-info {
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ip-info p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+}
+
+.ip-info a {
+    color: #64b5f6;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.ip-info a:hover {
+    color: #90caf9;
+    text-decoration: underline;
+}

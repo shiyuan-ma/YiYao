@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+
+    <mirrors>
+        <!-- 阿里云镜像（代理中央仓库） -->
+        <mirror>
+            <id>aliyun</id>
+            <mirrorOf>central</mirrorOf>
+            <name>Aliyun Maven Central</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </mirror>
+        
+        <!-- 华为云镜像（代理中央仓库） -->
+        <mirror>
+            <id>huaweicloud</id>
+            <mirrorOf>central</mirrorOf>
+            <name>HuaweiCloud Maven Central</name>
+            <url>https://repo.huaweicloud.com/repository/maven/</url>
+        </mirror>
+    </mirrors>
+
+    <profiles>
+        <!-- 保留你原有的配置 -->
+        <profile>
+            <id>jeecg</id>
+            <repositories>
+                <repository>
+                    <id>jeecg</id>
+                    <name>jeecg Repository</name>
+                    <url>https://maven.jeecg.org/nexus/content/repositories/jeecg/</url>
+                </repository>
+            </repositories>
+        </profile>
+        <profile>
+            <id>jitpack</id>
+            <repositories>
+                <repository>
+                    <id>jitpack.io</id>
+                    <name>JitPack</name>
+                    <url>https://jitpack.io</url>
+                </repository>
+            </repositories>
+        </profile>
+        
+        <!-- 新增：华为云仓库（作为备用） -->
+        <profile>
+            <id>huawei-repo</id>
+            <repositories>
+                <repository>
+                    <id>huawei-cloud</id>
+                    <name>HuaweiCloud Maven</name>
+                    <url>https://repo.huaweicloud.com/repository/maven/</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>jeecg</activeProfile>
+        <activeProfile>jitpack</activeProfile>
+        <activeProfile>huawei-repo</activeProfile> <!-- 激活华为云仓库 -->
+    </activeProfiles>
+</settings>
